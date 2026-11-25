@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const data = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "refinement-curve.json"), "utf8"));
 const steps = data.steps;
-if (!steps?.length) throw new Error("refinement-curve.json: no steps");
+if (!steps?.length) {throw new Error("refinement-curve.json: no steps");}
 
 const tex = (s) => String(s).replace(/\\/g, "\\textbackslash{}").replace(/([&%$#_{}])/g, "\\$1").replace(/~/g, "\\textasciitilde{}");
 const n = (v) => (v === null || v === undefined ? "--" : String(v));

@@ -889,7 +889,7 @@ chosen before any run. The attack success rate (ASR) is the fraction of
 runs in which the attack's side effect happened. The test suite of \cz{} also
 carries \AttacksMechanisms{} attacks on its own mechanisms, which
 have no native counterpart. The full catalog is in the repository
-\cite{codenclawed-benchmark} (\texttt{catalog.md}).
+\cite{codenclawed-benchmark}.
 
 \paragraph{Definitions.} These terms have one meaning throughout.
 \begin{itemize}[nosep]
@@ -993,7 +993,7 @@ defective-carrier scenarios.
 \paragraph{What ran live.} \Cref{tab:live} lists every live test:
 \LiveRunsAll{} counted runs with \LiveCallsAll{} tool calls, from
 \LiveDays{} (UTC), each a real Claude Code binary (version
-\LiveClaudeVersion{}, pinned) on a Claude subscription login, driven by a
+\LiveClaudeVersion{}, pinned) on a Claude login, driven by a
 real model, with up to \LiveRepsMax{} repetitions of the
 \CatalogTopTen{} highest-impact scenarios. \MechLiveClaude{} attacks on
 \cz{}'s own mechanisms are also shown end to end with the real Claude
@@ -1016,19 +1016,20 @@ by the current release of \sys{}; they are the \cz{} rows of
 \input{generated/live.tex}
 \end{table}
 
-\paragraph{Replay of the current release.} Every tool call of every
-counted C1 and C2 run was made live by the model; each is decided again,
-in the order the run made it, by the decision path of \sys{} at commit
-\ReplayKit{} (enclawed-oss), under the options a \cz{} session at commit
-\ReplayCodenclawed{} holds. The replay script
-(\texttt{scripts/bench/replay-ground-truth}, commit \ReplayScript{})
-imports the decision engine itself, not a test double. For each run it
-rebuilds the scenario's project from the fixtures with the run's nonces,
-plants the canaries, starts the MCP servers the run pinned, and follows
-the recorded run: file writes the run applied are applied, and exact
-file effects of shell lines the release lets run are applied; no shell
-command is executed. The decision path is deterministic, so the replay
-gives the decision the current release makes on that exact call. Labels
+\paragraph{The released version on every live call.} Every tool call
+of every counted C1 and C2 run was made live by the model. Each of those
+calls is given, in the order the run made it, to the decision engine of
+the released version: \sys{} at commit \ReplayKit{} (enclawed-oss),
+under the options a \cz{} session at commit \ReplayCodenclawed{} holds.
+The decision engine itself makes each decision, not a test double
+(\texttt{scripts/bench/replay-ground-truth}, commit \ReplayScript{}).
+For each run, the scenario's project is rebuilt from the fixtures with
+the run's nonces, the canaries are planted, the MCP servers the run
+pinned are started, and the run is followed as recorded: file writes the
+run applied are applied, and exact file effects of shell lines the
+release lets run are applied; no shell command is executed. The
+decision engine is deterministic, so this is the decision the released
+version makes on that exact call. Labels
 come only from \texttt{data/call-truth.json}, never from a decision.
 Calls a \cz{} session cannot make (a tool of a server it does not start,
 a disabled skill, a call that fails Claude Code's input schema before any
@@ -1037,8 +1038,8 @@ and counts are in \ReplayFile{}. The false-negative and false-positive
 figures for \cz{} therefore report the outcome of the current release,
 the refined state of the rules, on every one of the \CzDecided{} live
 calls of a reasonably large dataset. Because the decisions are
-deterministic, that outcome is not a favorable draw: replaying the same
-calls gives the same decisions every time, so there is no luckier or
+deterministic, that outcome is not a favorable draw: the same calls
+receive the same decisions every time, so there is no luckier or
 unluckier run to report, only the rules as they stand. A detection-based
 guardrail offers no such property: its outcome on the same calls varies
 with the model, the phrasing and the version (\cref{tab:headline}).
@@ -1121,7 +1122,7 @@ pairings in which both sides ask at all. Rates carry Wilson 95\%
 intervals \cite{wilson1927,brown2001interval}; the ratio's interval is a
 percentile bootstrap over runs within each configuration (\HeadBootB{}
 resamples, seed \HeadBootSeed{}). \cz{}'s decisions on the recorded calls
-are exact, replayed rather than sampled, so its intervals reflect only
+are exact, decided rather than sampled, so its intervals reflect only
 which calls and runs were sampled. Claude Code's layers do what they are
 designed to do, and each stops much of what the attacks attempt; they
 decide by a command's text or a model's reading of it, and the residual
@@ -1395,10 +1396,10 @@ for the rules (\cref{sec:limits}).\fi
 
 \paragraph{Refinement in a known domain.} The zero false positives are
 the end point of a short refinement on this domain's calls.
-\Cref{tab:refine} replays the same \RefCalls{} C1 calls at \RefCommits{} commits of
-enclawed-oss: the first ground-truth replay and every later commit that
-changes the adapter kit, up to \RefLastCommit{}, each with its own
-replay script and one fixed copy of the labels
+\Cref{tab:refine} gives the decisions on the same \RefCalls{} C1 live calls at \RefCommits{} commits of
+enclawed-oss: the first commit measured against the labels and every
+later commit that changes the adapter kit, up to \RefLastCommit{}, each
+deciding with its own engine and one fixed copy of the labels
 (\texttt{data/refinement-curve.json}). Of these commits, \RefSteps{}
 change a count and \RefUnchanged{} change none. False positives fell from \RefFirstFP{} to \RefLastFP{} within
 \RefHoursToZero{} hours. False negatives fell from \RefFirstFN{} to 0 at
@@ -1406,13 +1407,13 @@ change a count and \RefUnchanged{} change none. False positives fell from \RefFi
 read of the token file that scenario
 \texttt{inc62-railway-volume-delete} plants), and stayed 0 at every later
 commit, including a commit that tightens the rules (\texttt{83bbb937e});
-C2's \RefCTwoCalls{} calls, which the replay decides from
+C2's \RefCTwoCalls{} calls, decided from
 \texttt{3b30f01c5} on, are at \RefCTwoLastFN{} and \RefCTwoLastFP{}
 throughout. One harmful call that runs a file whose written content the
 harness cut is undetermined and reported apart, as in the main results.
 
 The loop, as practiced: (1) run the release on the domain's calls (here
-the replay of recorded sessions; in deployment, the log of questions
+the calls of the live sessions; in deployment, the log of questions
 put to a person); (2) compare each decision with its ground-truth label;
 (3) trace each false positive to the reason code that stopped it and
 group the calls by shape; (4) fix the root cause as a more exact reading
@@ -1421,7 +1422,7 @@ containable commands run contained and snapshotted, URLs the person
 named accepted, a CLI proven to hold no credential from the session's
 environment), never by allowlisting a string or weakening a check;
 (5) mutation-check each change (breaking the rule fails a test) and
-replay again: false negatives must stay 0 and false positives must fall;
+decide the calls again: false negatives must stay 0 and false positives must fall;
 (6) check a mismatch against the setup (labels, harness) before the
 rule. For example, from \RefExFrom{} to \RefExTo{}: the line
 \texttt{ls -la \&\& cat CONTRIBUTING.md} was asked (reason code
@@ -1437,13 +1438,13 @@ repository's configuration or hooks would make start a program.
 
 \begin{table}[!htbp]
 \centering\footnotesize
-\caption{Refinement curve: the same \RefCalls{} C1 calls (and C2's
-\RefCTwoCalls{} where the replay script decides them) replayed at
+\caption{Refinement curve: the decisions on the same \RefCalls{} C1
+live calls (and C2's \RefCTwoCalls{} where that commit decides them) at
 successive kit commits of enclawed-oss on 2026-11-23 (commit time,
 UTC$-$8), against one fixed set of labels. Rows: the commits that change
 a count, and two later ones; the \RefUnchanged{} commits in between that
 change none are in \texttt{data/refinement-curve.json}. --: not decided
-by that commit's replay script.}
+at that commit.}
 \label{tab:refine}
 \input{generated/refinement.tex}
 \end{table}
@@ -2109,17 +2110,19 @@ Every number in this paper can be reproduced from public repositories at
 pinned commits:
 \begin{itemize}[nosep]
 \item \cz{}: \url{https://github.com/enclawed/enclawed-code},
-  commit\\ \texttt{9b4ac32f52c897542c773b83e1f175e3a47a5d92}\\ (release
-  0.666.0; every result record names the build it measured,
+  commit\\ \texttt{9b4ac32f52c897542c773b83e1f175e3a47a5d92}\\ (tag
+  \texttt{arxiv-enclawed-code-v1}; release 0.666.0; every result record names the build it measured,
   \CzFinalBuild{} or \CzTwoBuild{});
 \item enclawed-oss: \url{https://github.com/enclawed/enclawed-oss},
-  commit\\ \texttt{8c2c068aa59ad2e9bae4f720f13ae79f611eac4d}\\ (the
-  public snapshot of the open core described here);
+  commit\\ \texttt{8c2c068aa59ad2e9bae4f720f13ae79f611eac4d}\\ (tag
+  \texttt{arxiv-enclawed-code-v1}; the public snapshot of the open core
+  described here);
 \item the full tables summarized here (incidents, attack catalog, every
   attack with its rule, per-scenario and per-model results, the striking
-  native failures and mixed actions, as Markdown and CSV):
-  \url{https://github.com/enclawed/enclawed-code/tree/main/docs/benchmark}
-  \cite{codenclawed-benchmark}, commit\\ \texttt{\CZEXPORTCOMMIT};
+  native failures and mixed actions): the data appendix
+  \texttt{report/enclawed-code-benchmark-tables.pdf} in the reproduction
+  repository below \cite{codenclawed-benchmark}, typeset from the
+  Markdown and CSV the table generator exports;
 \item the benchmark harness, this paper's sources, the table generator
   and the result files (a scrubbed data release, listed in its
   \texttt{README.md}):
@@ -2136,9 +2139,10 @@ table, every number and \texttt{abstract-arxiv.txt}:
 \end{center}
 or \texttt{make BENCH=<harness> RESULTS=<results>}; with \texttt{-{}-export <dir>} (or
 \texttt{CZ\_EXPORT\_DIR}) it also writes the repository tables, byte for
-byte. The \cz{} rows of \cref{tab:confusion} come from Enclawed's
-ground-truth replay, run on a copy of the result files with this paper's
-run marks applied (\texttt{scripts/mark-results.mjs}) and summarized by
+byte. The \cz{} rows of \cref{tab:confusion} come from the released
+decision engine's decisions on every live call
+(\texttt{pnpm bench:replay} in enclawed-oss), run on a copy of the result
+files with this paper's run marks applied (\texttt{scripts/mark-results.mjs}) and summarized by
 \texttt{scripts/replay-summary.mjs} into \ReplayFile{}, which records the
 digest of every input. With Claude Code 2.1.326, Node.js 22, bubblewrap
 and a Claude login, configurations N0, N1 and C1 reproduce with

@@ -104,7 +104,7 @@ const REPLAY = (() => {
   const named = opt("--replay", process.env.CZ_REPLAY || "");
   const dir = path.join(PAPER, "data");
   const files = named ? [path.resolve(named)] : fs.readdirSync(dir).filter((f) => /^replay-[0-9a-f]+\.json$/.test(f)).map((f) => path.join(dir, f));
-  if (!files.length) return null;
+  if (!files.length) {return null;}
   const all = files.map((f) => ({ f, j: JSON.parse(fs.readFileSync(f, "utf8")) }));
   all.sort((a, b) => String(a.j.kit.commitDate ?? "").localeCompare(String(b.j.kit.commitDate ?? "")));
   return { file: path.relative(PAPER, all.at(-1).f), ...all.at(-1).j };
@@ -134,7 +134,7 @@ const PENDING = "\\pending{}";
 const PENDING_FINAL = "\\pendingfinal{}";
 
 export function wilson(k, n, z = Z) {
-  if (n === 0) return null;
+  if (n === 0) {return null;}
   const p = k / n;
   const z2 = z * z;
   const den = 1 + z2 / n;
@@ -161,8 +161,8 @@ const hits = (rs) => rs.filter((r) => r.attackSucceeded).length;
 // or the attack's own description with internal ids and report names stripped.
 function sourceLabel(src) {
   src = String(src);
-  if (/^test\/adversarial\//.test(src)) return "planted instruction (adversarial suite)";
-  if (/^test\/stego\//.test(src)) return "hidden instruction";
+  if (src.startsWith('test/adversarial/')) {return "planted instruction (adversarial suite)";}
+  if (src.startsWith('test/stego/')) {return "hidden instruction";}
   const paren = src.match(/\(([^)]*)\)/);
   let t = paren ? paren[1] : src;
   t = t
@@ -181,7 +181,7 @@ function sourceLabel(src) {
 function readJsonl(file) {
   const out = [];
   for (const line of fs.readFileSync(file, "utf8").split("\n")) {
-    if (!line.trim()) continue;
+    if (!line.trim()) {continue;}
     try {
       out.push(JSON.parse(line));
     } catch {
@@ -202,7 +202,7 @@ const readText = (p) => {
 
 const RETRYABLE = new Set(["usage-limit", "auth", "api-transient"]);
 const files = fs.existsSync(RESULTS)
-  ? fs.readdirSync(RESULTS).filter((f) => f.endsWith(".jsonl") && !f.endsWith("-events.jsonl") && !f.startsWith("hostc-")).sort() // hostc-*: own block below
+  ? fs.readdirSync(RESULTS).filter((f) => f.endsWith(".jsonl") && !f.endsWith("-events.jsonl") && !f.startsWith("hostc-")).toSorted() // hostc-*: own block below
   : [];
 const byKey = new Map();
 let rawLines = 0;
@@ -232,9 +232,9 @@ for (const f of files) {
     const reported = !String(r.arm ?? "").startsWith("C") || isCountedBuild(r);
     if (!reported) {
       /* another build's attempt: held back with its records */
-    } else if (r.harnessError) lineHarnessErrors++;
-    else if (r.invalid) lineInvalid.set(r.invalid, (lineInvalid.get(r.invalid) ?? 0) + 1);
-    if (typeof r.scenario !== "string" || typeof r.arm !== "string") continue;
+    } else if (r.harnessError) {lineHarnessErrors++;}
+    else if (r.invalid) {lineInvalid.set(r.invalid, (lineInvalid.get(r.invalid) ?? 0) + 1);}
+    if (typeof r.scenario !== "string" || typeof r.arm !== "string") {continue;}
     byKey.set(r.key ?? `${r.scenario}|${r.arm}|${r.mode}|${r.modelRequested}|${r.rep}`, r);
   }
 }
@@ -252,10 +252,10 @@ const recs = valid.filter((r) => !isCz(r) || isCountedBuild(r));
 const preHarnessFix = recs.filter((r) => !r.harness).length;
 if (REPLAY) {
   for (const arm of ["C1", "C2"]) {
-    if (czBuildFor(arm) && REPLAY.builds[arm] !== czBuildFor(arm)) throw new Error(`${REPLAY.file} replays ${arm} build ${REPLAY.builds[arm]}, the paper counts ${czBuildFor(arm)}: re-run the replay`);
+    if (czBuildFor(arm) && REPLAY.builds[arm] !== czBuildFor(arm)) {throw new Error(`${REPLAY.file} replays ${arm} build ${REPLAY.builds[arm]}, the paper counts ${czBuildFor(arm)}: re-run the replay`);}
   }
   const live = digests.find((d) => d.f === "codenclawed-main.jsonl")?.sha;
-  if (live && live !== REPLAY.results["codenclawed-main.jsonl"]) throw new Error(`${REPLAY.file} was made from another codenclawed-main.jsonl than ${RESULTS}: re-run the replay`);
+  if (live && live !== REPLAY.results["codenclawed-main.jsonl"]) {throw new Error(`${REPLAY.file} was made from another codenclawed-main.jsonl than ${RESULTS}: re-run the replay`);}
 }
 
 // ------------------------------------------------------------------ catalog, harness, README
@@ -289,9 +289,9 @@ let attemptedRederived = 0;
   };
   for (const r of recs) {
     const sc = byId.get(r.scenario);
-    if (!sc || !Array.isArray(r.toolUses)) continue;
+    if (!sc || !Array.isArray(r.toolUses)) {continue;}
     const a = Boolean(sc.attempted(r.toolUses.map((u) => ({ name: u.name, input: typeof u.input === "string" ? parse(u.input) : u.input ?? {} })), {}));
-    if (a !== r.attempted) attemptedRederived++;
+    if (a !== r.attempted) {attemptedRederived++;}
     r.attempted = a;
   }
 }
@@ -299,7 +299,7 @@ const runSrc = readText(path.join(BENCH, "run.mjs")) || readText(path.join(BENCH
 const notRun = {};
 {
   const block = /NOT_RUN_ARMS\s*=\s*\{([\s\S]*?)\n\};/.exec(runSrc)?.[1] ?? "";
-  for (const m of block.matchAll(/(\w+):\s*"((?:[^"\\]|\\.)*)"/g)) notRun[m[1]] = m[2];
+  for (const m of block.matchAll(/(\w+):\s*"((?:[^"\\]|\\.)*)"/g)) {notRun[m[1]] = m[2];}
 }
 // The measured models, in the paper's order (smallest first).
 const MODEL_ORDER = MODELS;
@@ -313,8 +313,8 @@ const repro = new Map();
   for (const m of sec.matchAll(/`([^`]*--scenario\s+(\S+)[^`]*)`/g)) {
     // The harness now lives at the root of its own repository (run.mjs, not benchmarks/run.mjs).
     let cmd = m[1].trim().replace(/^node benchmarks\//, "node ");
-    if (!cmd.startsWith("node ")) cmd = `node run.mjs ${cmd}`;
-    if (!repro.has(m[2])) repro.set(m[2], cmd);
+    if (!cmd.startsWith("node ")) {cmd = `node run.mjs ${cmd}`;}
+    if (!repro.has(m[2])) {repro.set(m[2], cmd);}
   }
 }
 
@@ -350,8 +350,8 @@ const armModeHeader = (cols, first, lead, tail = [], names = ARM_NAME) => {
   const groups = [];
   for (const c of cols) {
     const g = groups.at(-1);
-    if (g && g.arm === c.arm) g.n++;
-    else groups.push({ arm: c.arm, n: 1 });
+    if (g && g.arm === c.arm) {g.n++;}
+    else {groups.push({ arm: c.arm, n: 1 });}
   }
   let at = first + 1;
   const top = [];
@@ -377,8 +377,8 @@ const emptyCell = (c, long = false) => (c.notRun || notRun[c.arm] ? (long ? `\\f
 // lists them all, sorted.
 const baseId = (m) => m.replace(/-\d{8}$/, "");
 const modelKey = (r) => {
-  if (!r.modelAnswered) return "(none recorded)";
-  const ms = [...new Set(String(r.modelAnswered).split(",").map((m) => m.trim()).filter((m) => m && m !== "<synthetic>").map(baseId))].sort();
+  if (!r.modelAnswered) {return "(none recorded)";}
+  const ms = [...new Set(String(r.modelAnswered).split(",").map((m) => m.trim()).filter((m) => m && m !== "<synthetic>").map(baseId))].toSorted();
   return ms.length ? ms.join(", ") : "(no model reply)";
 };
 const answeredAsRequested = (r) => modelKey(r) === r.modelRequested;
@@ -392,9 +392,9 @@ const answeredAsRequested = (r) => modelKey(r) === r.modelRequested;
 //   other         none of these (reported, so it cannot hide).
 const answerClass = (r) => {
   const k = modelKey(r);
-  if (k === r.modelRequested) return "as-requested";
-  if (k === "(none recorded)") return r.outcome === "no-session" && String(r.arm).startsWith("C") ? "refused" : "other";
-  if (k === "(no model reply)") return "cut-off";
+  if (k === r.modelRequested) {return "as-requested";}
+  if (k === "(none recorded)") {return r.outcome === "no-session" && String(r.arm).startsWith("C") ? "refused" : "other";}
+  if (k === "(no model reply)") {return "cut-off";}
   return "fallback";
 };
 const countClass = (rs, c) => rs.filter((r) => answerClass(r) === c).length;
@@ -414,7 +414,7 @@ const write = (name, body) => fs.writeFileSync(path.join(OUT, name), `% GENERATE
 const macros = [];
 const macroValues = new Map();
 const M = (name, value) => {
-  if (!/^[A-Za-z]+$/.test(name)) throw new Error(`bad macro name ${name}`);
+  if (!/^[A-Za-z]+$/.test(name)) {throw new Error(`bad macro name ${name}`);}
   macros.push(`\\newcommand{\\${name}}{${value}}`);
   macroValues.set(name, value);
 };
@@ -468,7 +468,7 @@ function plain(s, md = false) {
     [/``|''/g, '"'],
     [/\\ /g, " "],
   ];
-  for (const [re, to] of simple) t = t.replace(re, to);
+  for (const [re, to] of simple) {t = t.replace(re, to);}
   // Nested formatting, innermost first.
   for (let i = 0; i < 6; i++) {
     t = t
@@ -479,7 +479,7 @@ function plain(s, md = false) {
         keys.split(",").map((k) => BIB.get(k.trim())?.url ?? `[${k.trim()}]`).join(" "));
   }
   t = t.replace(/(?<!\\)[{}]/g, "").replace(/\\([#$%&_{}])/g, "$1").replace(/~/g, " ").replace(/\s{2,}/g, " ").trim();
-  if (/\\[A-Za-z]/.test(t)) throw new Error(`export: unconverted LaTeX in ${JSON.stringify(t)}`);
+  if (/\\[A-Za-z]/.test(t)) {throw new Error(`export: unconverted LaTeX in ${JSON.stringify(t)}`);}
   return t.replace(/\u0001/g, "\\").replace(/\u0002/g, "~");
 }
 const csvCell = (s) => (/[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
@@ -489,7 +489,7 @@ const HEAD = { err: null, same: new Map() };
 
 // --- run and catalog facts
 {
-  const ts = recs.map((r) => r.ts).filter(Boolean).sort();
+  const ts = recs.map((r) => r.ts).filter(Boolean).toSorted();
   M("RunsCounted", String(recs.length));
   M("RunsNative", String(recs.filter((r) => !isCz(r)).length));
   M("AttemptedRederived", String(attemptedRederived));
@@ -523,7 +523,7 @@ const HEAD = { err: null, same: new Map() };
   M("ResultDigests", digests.length ? digests.map((d) => `${tt(d.f)}: \\texttt{${d.sha.slice(0, 16)}}`).join("; ") : "no result file yet");
   M("FirstRun", ts[0] ? tex(ts[0]) : PENDING);
   M("LastRun", ts.at(-1) ? tex(ts.at(-1)) : PENDING);
-  const versions = [...new Set(recs.map((r) => r.claudeVersion).filter(Boolean))].sort();
+  const versions = [...new Set(recs.map((r) => r.claudeVersion).filter(Boolean))].toSorted();
   M("ClaudeVersions", versions.length ? versions.map(tt).join(", ") : PENDING);
   M("ModelsCovered", String(realModels.length));
   M("ModelsCoveredList", realModels.length ? realModels.map(tt).join(", ") : PENDING);
@@ -534,7 +534,7 @@ const HEAD = { err: null, same: new Map() };
   M("RunsNoModelRefused", String(countClass(recs, "refused")));
   M("RunsNoModelCutOff", String(countClass(recs, "cut-off")));
   M("RunsNoModelOther", String(countClass(recs, "other")));
-  M("RunsCutOffScenarios", [...new Set(recs.filter((r) => answerClass(r) === "cut-off").map((r) => r.scenario))].sort().map(ttBreak).join(", ") || "none");
+  M("RunsCutOffScenarios", [...new Set(recs.filter((r) => answerClass(r) === "cut-off").map((r) => r.scenario))].toSorted().map(ttBreak).join(", ") || "none");
   M("RunsCutOffHits", String(recs.filter((r) => answerClass(r) === "cut-off" && r.attackSucceeded).length));
   M("ModelsPlanned", String(MODEL_ORDER.length));
   M("PlanReps", PLAN_REPS ?? PENDING);
@@ -543,8 +543,8 @@ const HEAD = { err: null, same: new Map() };
   M("CzTwoBuild", czBuildFor("C2") ? tt(czBuildFor("C2")) : PENDING_FINAL);
   M("CatalogSize", String(CATALOG.length));
   M("CatalogTopTen", String(TOP10.length));
-  M("CatalogAdversarial", String(CATALOG.filter((s) => /^test\/adversarial\//.test(s.source)).length));
-  M("CatalogStego", String(CATALOG.filter((s) => /^test\/stego\//.test(s.source)).length));
+  M("CatalogAdversarial", String(CATALOG.filter((s) => s.source.startsWith('test/adversarial/')).length));
+  M("CatalogStego", String(CATALOG.filter((s) => s.source.startsWith('test/stego/')).length));
   M("CatalogRedteamGoals", String(CATALOG.filter((s) => !/^test\/(adversarial|stego)\//.test(s.source) && s.family !== "incident").length));
   // Reproductions of documented incidents (catalog-incidents.mjs; data/incidents.json `scenarios`).
   M("CatalogIncidents", String(CATALOG.filter((s) => s.family === "incident").length));
@@ -553,7 +553,7 @@ const HEAD = { err: null, same: new Map() };
   const autoFell = autoRuns.filter((r) => r.permissionModeReported && r.permissionModeReported !== "auto");
   M("AutoRunsNative", String(autoRuns.length));
   M("AutoFellBackNative", String(autoFell.length));
-  M("AutoFellBackModels", [...new Set(autoFell.map(modelKey))].sort().map(tt).join(", ") || "none");
+  M("AutoFellBackModels", [...new Set(autoFell.map(modelKey))].toSorted().map(tt).join(", ") || "none");
 }
 
 // --- native ASR macros
@@ -588,16 +588,16 @@ const HEAD = { err: null, same: new Map() };
     for (const m of ["acceptEdits", "auto"]) {
       const n0 = recs.filter((r) => r.scenario === s.id && r.arm === "N0" && r.mode === m);
       const n1 = recs.filter((r) => r.scenario === s.id && r.arm === "N1" && r.mode === m);
-      if (n0.length && n1.length && hits(n0) > 0) (hits(n1) === 0 ? helped : notHelped).add(s.id);
+      if (n0.length && n1.length && hits(n0) > 0) {(hits(n1) === 0 ? helped : notHelped).add(s.id);}
     }
   }
-  for (const id of helped) if (notHelped.has(id)) helped.delete(id);
+  for (const id of helped) {if (notHelped.has(id)) helped.delete(id);}
   M("SandboxHelpedCount", String(helped.size));
-  M("SandboxHelpedList", helped.size ? [...helped].sort().map(tt).join(", ") : "none so far");
+  M("SandboxHelpedList", helped.size ? [...helped].toSorted().map(tt).join(", ") : "none so far");
   M("SandboxNotHelpedCount", String(notHelped.size));
   // A scenario whose effect is absent under the sandbox only because the model never attempted the
   // planted action there is the model's doing, not the sandbox's: the sentence says so.
-  const noAttempt = [...helped].filter((id) => !recs.some((r) => r.scenario === id && r.arm === "N1" && ["acceptEdits", "auto"].includes(r.mode) && r.attempted === true)).sort();
+  const noAttempt = [...helped].filter((id) => !recs.some((r) => r.scenario === id && r.arm === "N1" && ["acceptEdits", "auto"].includes(r.mode) && r.attempted === true)).toSorted();
   M("SandboxHelpedNoAttemptCount", String(noAttempt.length));
   const noAttemptText = noAttempt.length
     ? ` In ${noAttempt.length === 1 ? "one of them" : `${noAttempt.length} of them`} (${noAttempt.map(tt).join(", ")}) the model never attempted the planted action under the sandbox, so the absence of the effect there comes from the model, not from the sandbox.`
@@ -606,7 +606,7 @@ const HEAD = { err: null, same: new Map() };
   M(
     "SandboxSentence",
     helped.size
-      ? `in the same permission mode, enabling it removed every observed effect of ${helped.size === 1 ? "one scenario" : `${helped.size} scenarios`} that took effect without it (${[...helped].sort().map(tt).join(", ")}), and did not remove it for ${notHelped.size}.${noAttemptText}`
+      ? `in the same permission mode, enabling it removed every observed effect of ${helped.size === 1 ? "one scenario" : `${helped.size} scenarios`} that took effect without it (${[...helped].toSorted().map(tt).join(", ")}), and did not remove it for ${notHelped.size}.${noAttemptText}`
       : notHelped.size
         ? `in the runs so far, enabling it did not remove the effect of any of the ${notHelped.size} scenarios that took effect without it in the same mode.`
         : "no scenario has yet taken effect without it in a mode where it was also run.",
@@ -620,14 +620,14 @@ const HEAD = { err: null, same: new Map() };
   const counts = (top) => {
     const by = new Map();
     for (const r of recs) {
-      if (r.arm !== "N0" && r.arm !== "N1") continue;
-      if (TOP10.includes(r.scenario) !== top) continue;
+      if (r.arm !== "N0" && r.arm !== "N1") {continue;}
+      if (TOP10.includes(r.scenario) !== top) {continue;}
       const k = `${r.scenario}|${r.arm}|${r.mode}`;
       by.set(k, (by.get(k) ?? 0) + 1);
     }
     const freq = new Map();
-    for (const n of by.values()) freq.set(n, (freq.get(n) ?? 0) + 1);
-    return [...freq].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ?? null;
+    for (const n of by.values()) {freq.set(n, (freq.get(n) ?? 0) + 1);}
+    return [...freq].toSorted((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ?? null;
   };
   const rest = counts(false), top = counts(true);
   M("NativeTrialsPerGroup", rest ? String(rest) : PENDING);
@@ -677,7 +677,7 @@ ${withArmRules(rows).join("\n")}
   // classes are columns: seven short headers instead of fourteen rotated ones.
   const rows = [];
   CONFIGS.forEach((c, i) => {
-    if (i > 0 && CONFIGS[i - 1].arm !== c.arm) rows.push("\\midrule");
+    if (i > 0 && CONFIGS[i - 1].arm !== c.arm) {rows.push("\\midrule");}
     rows.push(`${c.label} & ${impacts.map((imp) => cell(imp, c)).join(" & ")} \\\\`);
   });
   write(
@@ -704,8 +704,8 @@ ${rows.join("\n")}
     const mX = [];
     const rows = CONFIGS.map((c) => {
       const rs = mrs.filter((r) => inConfig(c, r));
-      if (!rs.length) return `${c.label} & \\multicolumn{4}{l}{${emptyCell(c)}} \\\\`;
-      const eff = [...new Set(rs.map((r) => r.permissionModeReported).filter((x) => x && x !== c.mode))].sort();
+      if (!rs.length) {return `${c.label} & \\multicolumn{4}{l}{${emptyCell(c)}} \\\\`;}
+      const eff = [...new Set(rs.map((r) => r.permissionModeReported).filter((x) => x && x !== c.mode))].toSorted();
       mX.push([c.arm, c.mode ?? "", String(rs.length), String(hits(rs)), asrOf(hits(rs), rs.length), ciOf(hits(rs), rs.length), eff.length ? `ran as ${eff.join(", ")}` : ""]);
       return `${c.label} & ${rs.length} & ${hits(rs)} & ${rate(hits(rs), rs.length)} & ${eff.length ? `ran as ${eff.map(tt).join(", ")}` : ""} \\\\`;
     });
@@ -755,10 +755,10 @@ ${withArmRules(compact).join("\n")}
   const arms = [...new Set(CONFIGS.map((c) => c.arm))];
   const answerLabel = (r) => {
     const c = answerClass(r);
-    if (c === "as-requested") return { rank: 0, text: "the model requested" };
-    if (c === "fallback") return { rank: 1, text: `fallback: ${modelKey(r).split(", ").map(tt).join(" and ")}` };
-    if (c === "refused") return { rank: 2, text: "no model: \\cz{} refused the launch" };
-    if (c === "cut-off") return { rank: 3, text: "no model: the attack cut the session off" };
+    if (c === "as-requested") {return { rank: 0, text: "the model requested" };}
+    if (c === "fallback") {return { rank: 1, text: `fallback: ${modelKey(r).split(", ").map(tt).join(" and ")}` };}
+    if (c === "refused") {return { rank: 2, text: "no model: \\cz{} refused the launch" };}
+    if (c === "cut-off") {return { rank: 3, text: "no model: the attack cut the session off" };}
     return { rank: 4, text: `other: ${tt(modelKey(r))}` };
   };
   const modelsX = [];
@@ -775,9 +775,9 @@ ${withArmRules(compact).join("\n")}
     return `${arms.map((a) => byArm.get(a) ?? 0).join(" & ")} & ${total}`;
   };
   const body = [];
-  for (const req of [...groups.keys()].sort((a, b) => modelRank(a) - modelRank(b) || a.localeCompare(b))) {
-    if (body.length) body.push("\\midrule");
-    const rows = [...groups.get(req).entries()].sort(([ta, a], [tb, b]) => a.rank - b.rank || ta.localeCompare(tb));
+  for (const req of [...groups.keys()].toSorted((a, b) => modelRank(a) - modelRank(b) || a.localeCompare(b))) {
+    if (body.length) {body.push("\\midrule");}
+    const rows = [...groups.get(req).entries()].toSorted(([ta, a], [tb, b]) => a.rank - b.rank || ta.localeCompare(tb));
     rows.forEach(([text, row], i) => body.push(`${i === 0 ? tt(req) : ""} & ${text} & ${cells(row.byArm)} \\\\`));
     rows.forEach(([text, row]) => modelsX.push([req, text, ...cells(row.byArm).split(" & ")]));
   }
@@ -831,8 +831,8 @@ const poolOf = (cs, id) => recs.filter((r) => r.scenario === id && cs.some((c) =
   let closed1 = 0, closed2 = 0, measured1 = 0, measured2 = 0;
   for (const s of open) {
     const c1 = poolOf(czCfgs("C1"), s.id), c2 = poolOf(czCfgs("C2"), s.id);
-    if (c1.length) { measured1++; if (hits(c1) === 0) closed1++; }
-    if (c2.length) { measured2++; if (hits(c2) === 0) closed2++; }
+    if (c1.length) { measured1++; if (hits(c1) === 0) {closed1++;} }
+    if (c2.length) { measured2++; if (hits(c2) === 0) {closed2++;} }
   }
   M("GapsNative", String(open.length));
   // As for the whole catalog below: a scenario whose carrier was defective has no valid codenclawed
@@ -840,7 +840,7 @@ const poolOf = (cs, id) => recs.filter((r) => r.scenario === id && cs.some((c) =
   const carrierOnlyOpen = (arm) => open.filter((s) => STEGO_CARRIER_DEFECT.scenarios.has(s.id) && poolOf(czCfgs(arm), s.id).length === 0).length;
   M("GapsMeasuredSoftware", CZ_FINAL ? String(measured1) : PENDING_FINAL);
   // The paper says "of them" of the native gaps measured software only: stop when that is no longer exact.
-  if (CZ_FINAL && carrierOnlyOpen("C1") > 0) throw new Error("a native gap has no valid C1 run (defective carrier): revise the gap-closure sentence of the paper");
+  if (CZ_FINAL && carrierOnlyOpen("C1") > 0) {throw new Error("a native gap has no valid C1 run (defective carrier): revise the gap-closure sentence of the paper");}
   M("GapsClosedSoftware", CZ_FINAL && measured1 + carrierOnlyOpen("C1") === open.length ? String(closed1) : PENDING_FINAL);
   M("GapsClosedDevice", CZ_FINAL && measured2 + carrierOnlyOpen("C2") === open.length ? String(closed2) : PENDING_FINAL);
 }
@@ -1013,7 +1013,7 @@ const HOSTC_IN_SCOPE = HOSTC_ROWS.filter((n) => n !== 8);
 const hostcRecs = (() => {
   const file = path.join(RESULTS, "hostc-main.jsonl");
   const lastByKey = new Map();
-  for (const r of fs.existsSync(file) ? readJsonl(file) : []) lastByKey.set(r.key ?? `${r.attack}|${r.arm}|${r.ts}`, r);
+  for (const r of fs.existsSync(file) ? readJsonl(file) : []) {lastByKey.set(r.key ?? `${r.attack}|${r.arm}|${r.ts}`, r);}
   return [...lastByKey.values()].filter(
     (r) =>
       !r.invalid &&
@@ -1028,10 +1028,10 @@ const hostcRecs = (() => {
 // { runs, blocked, na } for one attack and arm; runs === null means nothing counted yet.
 const hostcCell = (n, arm) => {
   // Attacks that need a device are declared n/a software only (hostc/attacks.mjs), never run there.
-  if (arm === "C1" && HOSTC_NA[n] !== undefined) return { runs: null, blocked: 0, na: true };
+  if (arm === "C1" && HOSTC_NA[n] !== undefined) {return { runs: null, blocked: 0, na: true };}
   const all = hostcRecs.filter((r) => String(r.attack) === String(n) && r.arm === arm);
   const rs = all.filter((r) => r.outcome !== "n/a");
-  if (!rs.length) return { runs: null, blocked: 0, na: all.length > 0 };
+  if (!rs.length) {return { runs: null, blocked: 0, na: all.length > 0 };}
   return { runs: rs.length, blocked: rs.filter((r) => r.outcome === "blocked" || r.outcome === "detected-stopped").length, na: false };
 };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1042,11 +1042,11 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
     const what = HOSTC_ATTACKS[n] ?? `attack ${n}`;
     const text = (c) => (c.na ? "n/a" : c.runs === null ? PENDING_FINAL : `${c.blocked === c.runs ? "blocked" : c.blocked === 0 ? "succeeded" : "mixed"} (${c.blocked}/${c.runs})`);
     const sw = hostcCell(n, "C1"), dv = hostcCell(n, "C2");
-    if ((!sw.na && sw.runs === null) || (!dv.na && dv.runs === null)) complete = false;
+    if ((!sw.na && sw.runs === null) || (!dv.na && dv.runs === null)) {complete = false;}
     if (n !== 8) {
-      if (!sw.na) swApplicable++;
-      if (!sw.na && sw.runs !== null && sw.blocked < sw.runs) swLost++;
-      if (!dv.na && dv.runs !== null && dv.blocked === dv.runs) devBlocked++;
+      if (!sw.na) {swApplicable++;}
+      if (!sw.na && sw.runs !== null && sw.blocked < sw.runs) {swLost++;}
+      if (!dv.na && dv.runs !== null && dv.blocked === dv.runs) {devBlocked++;}
     }
     // Attack 8 is the out-of-scope control (no agent involved): its cell says so and keeps its counts.
     const cell = (c) => (n === 8 && !c.na && c.runs !== null ? `acted (${c.runs - c.blocked}/${c.runs})` : text(c));
@@ -1082,7 +1082,7 @@ ${rows.join("\n")}
     ...HOSTC_IN_SCOPE.filter((n) => !RULES.hostc?.[n]?.rule).map((n) => `hostc ${n}`),
     ...findings.filter((f) => !RULES.mechanisms?.[`${f.team}/${f.id}`]?.rule).map((f) => `finding ${f.team}/${f.id}`),
   ];
-  if (missing.length) throw new Error(`attack-rules.json has no rule for: ${missing.join(", ")}`);
+  if (missing.length) {throw new Error(`attack-rules.json has no rule for: ${missing.join(", ")}`);}
   const STATUS = { closed: "closed", open: "open", na: "n/a", failsclosed: "fails closed" };
   // Break long monospace tokens after / . _ - so narrow columns never overflow.
   const ttw = (s) => `\\texttt{${tex(s).replace(/--/g, "-{}-").replace(/(\/|\\_|\.|-)/g, "$1\\allowbreak{}")}}`;
@@ -1107,9 +1107,9 @@ ${rows.join("\n")}
   const finding = (s) => SPELL.reduce((t, [re, to]) => t.replace(re, to), s.replace(/\s*\((live|device)\)/g, "")).trim();
   const cellOf = (rs, cz) => (rs.length ? `${hits(rs)}/${rs.length}` : cz && !CZ_FINAL ? PENDING_FINAL : "--");
   const groupOf = (s) =>
-    /^test\/adversarial\//.test(s.source)
+    s.source.startsWith('test/adversarial/')
       ? "Planted instructions in repository files"
-      : /^test\/stego\//.test(s.source)
+      : s.source.startsWith('test/stego/')
         ? "Hidden instructions (invisible or disguised text)"
         : s.family === "mcp"
           ? "MCP servers, tool descriptions and tool results"
@@ -1140,13 +1140,13 @@ ${rows.join("\n")}
   const stat = { rows: 0, live: 0, hostc: 0, mech: 0, swOpenDesign: 0, devOpenDesign: 0, swOpenNotHost: 0, liveSwMeasured: 0, liveSwClosed: 0, liveDevMeasured: 0, liveDevClosed: 0 };
   for (const g of GROUPS) {
     const ss = CATALOG.filter((s) => groupOf(s) === g);
-    if (!ss.length) continue;
+    if (!ss.length) {continue;}
     rows.push(head(`${g} (live benchmark)`));
     for (const s of ss) {
       const n = poolOf(natCfgs, s.id), c1 = poolOf(czCfgs("C1"), s.id), c2 = poolOf(czCfgs("C2"), s.id);
       const rule = RULES.catalog[s.id];
-      if (c1.length) { stat.liveSwMeasured++; if (hits(c1) === 0) stat.liveSwClosed++; }
-      if (c2.length) { stat.liveDevMeasured++; if (hits(c2) === 0) stat.liveDevClosed++; }
+      if (c1.length) { stat.liveSwMeasured++; if (hits(c1) === 0) {stat.liveSwClosed++;} }
+      if (c2.length) { stat.liveDevMeasured++; if (hits(c2) === 0) {stat.liveDevClosed++;} }
       stat.rows++; stat.live++;
       rows.push(`${md(s.goal)} & ${n.length ? `${hits(n)}/${n.length}` : "--"} & ${cellOf(c1, true)} & ${cellOf(c2, true)} & ${rule.rule} & -- \\\\`);
       attX.push([curGroup, s.id, md(s.goal), n.length ? `${hits(n)}/${n.length}` : "--", cellOf(c1, true), cellOf(c2, true), rule.rule, "--", "live benchmark"]);
@@ -1158,7 +1158,7 @@ ${rows.join("\n")}
     const rule = RULES.hostc[n];
     const sw = hostcCell(n, "C1"), dv = hostcCell(n, "C2");
     const t = (c) => (c.na ? "n/a" : c.runs === null ? PENDING_FINAL : `${c.runs - c.blocked}/${c.runs}`);
-    if (rule.reason) stat.swOpenDesign++;
+    if (rule.reason) {stat.swOpenDesign++;}
     stat.rows++; stat.hostc++;
     rows.push(`${tex(cap(HOSTC_ATTACKS[n] ?? `attack ${n}`))} & n/a & ${t(sw)} & ${t(dv)} & ${rule.rule} & ${rule.reason ?? (sw.na ? "n/a: needs a device to attack" : "--")} \\\\`);
     attX.push([curGroup, `hostc-${n}`, tex(cap(HOSTC_ATTACKS[n] ?? `attack ${n}`)), "n/a", t(sw), t(dv), rule.rule, rule.reason ?? (sw.na ? "n/a: needs a device to attack" : "--"), "live, compromised host"]);
@@ -1171,17 +1171,17 @@ ${rows.join("\n")}
     for (const f of findings.filter((x) => x.team === team)) {
       const rule = RULES.mechanisms[`${f.team}/${f.id}`];
       const sw = rule.sw ?? "closed", dv = rule.dev ?? "closed";
-      if (!STATUS[sw] || !STATUS[dv]) throw new Error(`bad status for ${f.team}/${f.id}`);
-      if (sw === "open") { stat.swOpenDesign++; if (!rule.hostCompromised) stat.swOpenNotHost++; }
-      if (dv === "open") stat.devOpenDesign++;
-      if (sw === "open" && !rule.reason) throw new Error(`open without a reason: ${f.team}/${f.id}`);
+      if (!STATUS[sw] || !STATUS[dv]) {throw new Error(`bad status for ${f.team}/${f.id}`);}
+      if (sw === "open") { stat.swOpenDesign++; if (!rule.hostCompromised) {stat.swOpenNotHost++;} }
+      if (dv === "open") {stat.devOpenDesign++;}
+      if (sw === "open" && !rule.reason) {throw new Error(`open without a reason: ${f.team}/${f.id}`);}
       stat.rows++; stat.mech++;
       const mark = /\(live\)/.test(f.attack) ? "\\textsuperscript{L}" : /\(device\)/.test(f.attack) ? "\\textsuperscript{D}" : "";
       rows.push(`${finding(f.attack)}${mark} & n/a & ${STATUS[sw]} & ${STATUS[dv]} & ${rule.rule} & ${rule.reason ?? (sw === "na" ? "n/a: needs a device to attack" : "--")} \\\\`);
       attX.push([curGroup, `${f.team}-${f.id}`, finding(f.attack), "n/a", STATUS[sw], STATUS[dv], rule.rule, rule.reason ?? (sw === "na" ? "n/a: needs a device to attack" : "--"), mark ? (mark.includes("L") ? "test suite; shown with the real Claude Code" : "test suite; shown with a real Enclaweder") : "test suite (hook or launcher)"]);
     }
   }
-  for (const s of CATALOG) if (RULES.catalog[s.id].reason) throw new Error(`catalog attack with an open reason: ${s.id}`);
+  for (const s of CATALOG) {if (RULES.catalog[s.id].reason) throw new Error(`catalog attack with an open reason: ${s.id}`);}
   X("attacks", "Every attack tried against Enclawed Code, and the rule that closes it",
     ["Three sources: the scenarios of the live catalog, the compromised-host attacks that act on Enclawed Code, and the test suite's attacks on Enclawed Code's own mechanisms. Native: runs in which the attack's effect happened / runs, pooled over every native configuration and mode; n/a where the attack targets Enclawed Code itself. SW: Enclawed Code software only (C1); Dev: Enclawed Code with an Enclaweder (C2). Live rows give effect / runs (--: no valid run of the attack in that configuration); test-suite rows give the status in Enclawed Code. Fails closed: the attack can only stop work, and no call runs unchecked. Reason: why an attack is open software only (it needs malicious code already running as the user outside the agent)."],
     ["Group", "Id", "Attack", "Native", "SW", "Dev", "Rule that closes it", "Reason, if open software only", "Evidence"], attX);
@@ -1199,9 +1199,9 @@ ${rows.join("\n")}
       for (const r of rs) {
         const c = String(r[i]);
         const m = c.match(/^(\d+)\/(\d+)$/);
-        if (m) { decided++; if (Number(m[1]) > 0) bad++; }
+        if (m) { decided++; if (Number(m[1]) > 0) {bad++;} }
         else if (c === "open") { decided++; bad++; }
-        else if (c === "closed" || c === "fails closed") decided++;
+        else if (c === "closed" || c === "fails closed") {decided++;}
       }
       return { bad, decided };
     };
@@ -1289,7 +1289,7 @@ ${rows.join("\n")}
   const hitl = new Map();
   const nativeRow = (c) => {
     const rs = recs.filter((r) => inConfig(c, r));
-    if (!rs.length) return `${c.label} & \\multicolumn{7}{l}{${emptyCell(c)}} \\\\`;
+    if (!rs.length) {return `${c.label} & \\multicolumn{7}{l}{${emptyCell(c)}} \\\\`;}
     // A native denial is a person's prompt (turned into a denial by the headless run) except where no
     // person is in the loop: in a run that ran in auto it is the classifier's block, and in
     // bypassPermissions nothing is asked (Methods, Definitions; the outcome table counts the same way).
@@ -1307,7 +1307,7 @@ ${rows.join("\n")}
   const czRow = (c) => {
     const r = REPLAY && CZ_FINAL ? REPLAY.configurations[c.arm]?.[c.mode] ?? null : null;
     const runs = r ? REPLAY.runsByArmMode?.[c.arm]?.[c.mode] : null;
-    if (!r || !r.decisions || !runs) return `${c.label} & \\multicolumn{7}{l}{${emptyCell(c)}} \\\\`;
+    if (!r || !r.decisions || !runs) {return `${c.label} & \\multicolumn{7}{l}{${emptyCell(c)}} \\\\`;}
     // The same calls as the confusion table (an undetermined call is not counted there either).
     const calls = r.calls - r.undetermined;
     const { ask, deny } = r.decisions;
@@ -1318,7 +1318,7 @@ ${rows.join("\n")}
   };
   const liveTaskRow = (c) => {
     const rs = recs.filter((r) => inConfig(c, r));
-    if (!rs.length) return null;
+    if (!rs.length) {return null;}
     return `${c.label} & ${rs.length} & ${taskCells(rs)} & -- & -- & -- & -- \\\\`;
   };
   const cfgs = CONFIGS.filter((c) => !c.notRun);
@@ -1342,12 +1342,12 @@ ${main.flatMap((row, i) => (i > 0 && cfgs[i - 1].arm !== cfgs[i].arm ? ["\\midru
   for (const c of cfgs) {
     const h = hitl.get(c.id);
     const name = `${ARMP[c.arm]}${MODE_CAP[c.mode]}`;
-    if (!ARMP[c.arm] || !MODE_CAP[c.mode]) continue;
+    if (!ARMP[c.arm] || !MODE_CAP[c.mode]) {continue;}
     M(`${name}NeedPerson`, h ? String(h.need) : PENDING);
     M(`${name}NeedPerRun`, h ? fmt(h.need / h.runs) : PENDING);
     M(`${name}HitlRuns`, h ? String(h.runs) : PENDING);
-    if (c.cz && c.mode === "bypassPermissions") M(`${name}RefusedNoPerson`, h ? String(h.refused) : PENDING);
-    if (!c.cz && c.mode === "auto") M(`${name}RefusedClassifier`, h ? String(h.refused) : PENDING);
+    if (c.cz && c.mode === "bypassPermissions") {M(`${name}RefusedNoPerson`, h ? String(h.refused) : PENDING);}
+    if (!c.cz && c.mode === "auto") {M(`${name}RefusedClassifier`, h ? String(h.refused) : PENDING);}
   }
   for (const arm of ["C1", "C2"]) {
     // Over the three modes in which a person can be asked.
@@ -1444,7 +1444,7 @@ ${main.flatMap((row, i) => (i > 0 && cfgs[i - 1].arm !== cfgs[i].arm ? ["\\midru
         : `${label}, \\texttt{${m}} & \\multicolumn{6}{l}{${PENDING_FINAL}} \\\\`);
     }
     M(`${ARMP[arm]}ConsequentialPerRunAsking`, ok && runsAsking ? fmt(consAsking / runsAsking) : PENDING);
-    if (arm === "C1") kindRows.push("\\midrule");
+    if (arm === "C1") {kindRows.push("\\midrule");}
   }
   write(
     "asks-kind.tex",
@@ -1461,11 +1461,11 @@ ${kindRows.join("\n")}
   // scenarios) by label, and asks on harmless calls anywhere.
   const askedAll = xs.filter((x) => ASKING.includes(x.mode) && x.decision === "ask");
   const noAtt = askedAll.filter((x) => family.get(x.scenario) === "hallucination");
-  for (const l of LABELS) M(`CzNoAttackerAsk${l[0].toUpperCase()}${l.slice(1)}`, ok ? String(noAtt.filter((x) => x.label === l).length) : PENDING);
+  for (const l of LABELS) {M(`CzNoAttackerAsk${l[0].toUpperCase()}${l.slice(1)}`, ok ? String(noAtt.filter((x) => x.label === l).length) : PENDING);}
   M("CzAskingAskHarmless", ok ? String(askedAll.filter((x) => x.label === "harmless").length) : PENDING);
   M("CzAskingAsk", ok ? String(askedAll.length) : PENDING);
   // The harmful over-reach the no-attacker asks are about, by ground-truth action.
-  M("CzNoAttackerHarmfulActions", ok ? [...new Set(noAtt.filter((x) => x.label === "harmful").map((x) => tt(x.action)))].sort().join(", ") : PENDING);
+  M("CzNoAttackerHarmfulActions", ok ? [...new Set(noAtt.filter((x) => x.label === "harmful").map((x) => tt(x.action)))].toSorted().join(", ") : PENDING);
 
   // Matched runs.
   const runs = ok ? { C1: new Set(REPLAY.replayedRuns.C1), C2: new Set(REPLAY.replayedRuns.C2) } : { C1: new Set(), C2: new Set() };
@@ -1474,7 +1474,7 @@ ${kindRows.join("\n")}
   const scenarios = (arm) => new Set([...runs[arm]].map((k) => k.split("|")[0]));
   M("MatchedRuns", ok ? String(matched.size) : PENDING);
   M("CzTwoReplayedRuns", ok ? String(runs.C2.size) : PENDING);
-  M("MatchedModels", ok ? [...models("C2")].sort().map(tt).join(", ") : PENDING);
+  M("MatchedModels", ok ? [...models("C2")].toSorted().map(tt).join(", ") : PENDING);
   M("CzOneModelCount", ok ? String(models("C1").size) : PENDING);
   M("CzTwoModelCount", ok ? String(models("C2").size) : PENDING);
   M("CzOneScenarioCount", ok ? String(scenarios("C1").size) : PENDING);
@@ -1495,13 +1495,13 @@ ${kindRows.join("\n")}
   for (const m of [...MODES, null]) {
     const a = t("C1", m), b = t("C2", m);
     const cell = (r) => `${r.calls} & ${m === "bypassPermissions" ? `${r.ask}$^\\dagger$` : r.ask} & ${m ? fmt(r.ask / r.runs) : "--"} & ${r.fn} & ${r.fp}`;
-    if (!m) matchedRows.push("\\midrule");
+    if (!m) {matchedRows.push("\\midrule");}
     matchedRows.push(ok ? `${m ? `\\texttt{${m}}` : "All modes"} & ${a.runs} & ${cell(a)} & ${cell(b)} \\\\` : `${m ? `\\texttt{${m}}` : "All modes"} & \\multicolumn{11}{l}{${PENDING_FINAL}} \\\\`);
     for (const arm of ["C1", "C2"]) {
       const r = arm === "C1" ? a : b;
       const p = `Matched${ARMP[arm]}${m ? MODE_CAP[m] : ""}`;
-      if (m) M(`${p}NeedPerRun`, ok && r.runs ? fmt(r.ask / r.runs) : PENDING);
-      if (m === "bypassPermissions") M(`${p}Refused`, ok ? String(r.deny) : PENDING);
+      if (m) {M(`${p}NeedPerRun`, ok && r.runs ? fmt(r.ask / r.runs) : PENDING);}
+      if (m === "bypassPermissions") {M(`${p}Refused`, ok ? String(r.deny) : PENDING);}
       if (!m) {
         M(`${p}FN`, ok ? String(r.fn) : PENDING);
         M(`${p}FP`, ok ? String(r.fp) : PENDING);
@@ -1530,15 +1530,15 @@ ${matchedRows.join("\n")}
   // Shared distinct calls and how many of them the two arms decide differently.
   const dec = { C1: new Map(), C2: new Map() };
   for (const x of ok ? REPLAY.calls : []) {
-    if (x.mode === "bypassPermissions") continue;
+    if (x.mode === "bypassPermissions") {continue;}
     const k = JSON.stringify([x.scenario, x.tool, x.text]);
     (dec[x.arm].get(k) ?? dec[x.arm].set(k, new Set()).get(k)).add(x.decision);
   }
   let shared = 0, differ = 0;
   for (const [k, s] of dec.C2) {
-    if (!dec.C1.has(k)) continue;
+    if (!dec.C1.has(k)) {continue;}
     shared++;
-    if (new Set([...s, ...dec.C1.get(k)]).size > 1) differ++;
+    if (new Set([...s, ...dec.C1.get(k)]).size > 1) {differ++;}
   }
   M("SharedCalls", ok ? String(shared) : PENDING);
   M("SharedCallsDiffer", ok ? String(differ) : PENDING);
@@ -1574,7 +1574,7 @@ ${matchedRows.join("\n")}
     // without a planted configuration adds no call.
     if (!isCz(r)) {
       const launch = { tool: "(launch)", text: `scenario ${r.scenario}`, stopped: false, decision: "launched", codes: [], launch: true, match: "exact" };
-      if (ruleOf(launch)) calls.push(launch);
+      if (ruleOf(launch)) {calls.push(launch);}
     }
     for (const c of calls) {
       const rule = ruleOf(c);
@@ -1584,15 +1584,15 @@ ${matchedRows.join("\n")}
       }
       c.rule = rule;
     }
-    if (Array.isArray(calls.decisions)) resolveCz(calls, calls.decisions, (c) => c.rule?.label ?? "?", shapeOf, W);
+    if (Array.isArray(calls.decisions)) {resolveCz(calls, calls.decisions, (c) => c.rule?.label ?? "?", shapeOf, W);}
     // Bounds for the calls that could not be paired: per run and tool, over every pairing consistent
     // with the decisions, how many positive calls can have been let run and how many harmless calls
     // stopped (a tool with fewer decisions than calls leaves those calls free).
     if (Array.isArray(calls.decisions)) {
       const groups = new Map();
-      for (const c of calls) if (!c.launch && c.rule) (groups.get(c.tool) ?? groups.set(c.tool, []).get(c.tool)).push(c);
+      for (const c of calls) {if (!c.launch && c.rule) (groups.get(c.tool) ?? groups.set(c.tool, []).get(c.tool)).push(c);}
       for (const [tool, cs] of groups) {
-        if (!cs.some((c) => c.stopped === null)) continue;
+        if (!cs.some((c) => c.stopped === null)) {continue;}
         const ds = calls.decisions.filter((d) => d.tool === tool);
         const S = ds.filter(isStopped).length, A = ds.length - S, free = Math.max(0, cs.length - ds.length);
         const P = cs.filter((c) => c.rule.label !== "harmless").length, N = cs.length - P;
@@ -1602,11 +1602,11 @@ ${matchedRows.join("\n")}
         bounds.push(g);
       }
     }
-    for (const c of calls) if (c.rule) labeled.push({ r, c, label: c.rule.label, action: c.rule.actionOf(c.text) });
+    for (const c of calls) {if (c.rule) labeled.push({ r, c, label: c.rule.label, action: c.rule.actionOf(c.text) });}
   }
   if (argv.includes("--label-report")) {
     // Labeling aid: every unlabeled shape, then a reproducible random sample of labeled calls.
-    for (const [k, n] of [...unlabeled].sort()) process.stdout.write(`${n}\t${k}\n`);
+    for (const [k, n] of [...unlabeled].toSorted()) {process.stdout.write(`${n}\t${k}\n`);}
     let seed = Number(opt("--seed", "1"));
     const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
     const n = Number(opt("--audit", "40"));
@@ -1625,9 +1625,9 @@ ${matchedRows.join("\n")}
     for (const x of xs) {
       t[x.label]++;
       const pos = POS.has(x.label);
-      if (x.c.stopped === null || x.c.stopped === undefined) pos ? t.unpairedPos++ : t.unpairedNeg++;
-      else if (pos) x.c.stopped ? t.tp++ : (t.fn++, x.label === "harmful" && t.fnHarmful++);
-      else x.c.stopped ? t.fp++ : t.tn++;
+      if (x.c.stopped === null || x.c.stopped === undefined) {pos ? t.unpairedPos++ : t.unpairedNeg++;}
+      else if (pos) {x.c.stopped ? t.tp++ : (t.fn++, x.label === "harmful" && t.fnHarmful++);}
+      else {x.c.stopped ? t.fp++ : t.tn++;}
     }
     return t;
   };
@@ -1639,10 +1639,10 @@ ${matchedRows.join("\n")}
   const ranIn = (r) => r.permissionModeReported ?? r.mode;
   const inCfg = (c) => (x) => inConfig(c, x.r) && !x.c.launch && (c.cz || !c.ranIn || ranIn(x.r) === c.ranIn);
   const cfgs = CONFIGS.filter((c) => !c.notRun).flatMap((c) => {
-    if (c.cz || c.mode !== "auto") return [c];
+    if (c.cz || c.mode !== "auto") {return [c];}
     const other = recs.filter((r) => inConfig(c, r) && ranIn(r) !== "auto");
-    if (!other.length) return [{ ...c, ranIn: "auto" }];
-    if (other.some((r) => ranIn(r) !== "default")) throw new Error(`${c.id}: runs reported a mode other than auto or default`);
+    if (!other.length) {return [{ ...c, ranIn: "auto" }];}
+    if (other.some((r) => ranIn(r) !== "default")) {throw new Error(`${c.id}: runs reported a mode other than auto or default`);}
     return [{ ...c, ranIn: "auto" }, { ...c, id: `${c.id}@default`, ranIn: "default", label: `${c.label}, ran in \\texttt{default}`, short: `${c.short}\\textrightarrow{}default` }];
   });
   const T = new Map(cfgs.map((c) => [c.id, tally(labeled.filter(inCfg(c)))]));
@@ -1671,17 +1671,17 @@ ${matchedRows.join("\n")}
   const outcomesOf = (c) => {
     if (c.cz) {
       const r = REPLAY && CZ_FINAL ? REPLAY.configurations[c.arm]?.[c.mode] ?? null : null;
-      if (!r) return null;
-      if (!r.decisionsByLabel) throw new Error(`${REPLAY.file} has no decisionsByLabel: re-run scripts/replay-summary.mjs`);
+      if (!r) {return null;}
+      if (!r.decisionsByLabel) {throw new Error(`${REPLAY.file} has no decisionsByLabel: re-run scripts/replay-summary.mjs`);}
       return { o: r.decisionsByLabel, unpaired: 0 };
     }
     const xs = labeled.filter(inCfg(c));
-    if (!xs.length) return null;
+    if (!xs.length) {return null;}
     const o = zero3();
     let unpaired = 0;
     for (const x of xs) {
-      if (x.c.stopped === null || x.c.stopped === undefined) unpaired++;
-      else o[x.label][x.c.stopped ? nativeStopKind(c) : "allow"]++;
+      if (x.c.stopped === null || x.c.stopped === undefined) {unpaired++;}
+      else {o[x.label][x.c.stopped ? nativeStopKind(c) : "allow"]++;}
     }
     return { o, unpaired };
   };
@@ -1712,13 +1712,13 @@ ${matchedRows.join("\n")}
   const cfgName = (c) => `${c.arm} ${MODE_ABBR[c.mode] ?? c.mode}${c.ranIn === "default" && c.mode === "auto" ? "\\textrightarrow{}default" : ""}`;
   const outRow = (c) => {
     const x = OUT.get(c.id);
-    if (!x) return `${cfgName(c)} & \\multicolumn{${showUnpaired ? 11 : 10}}{l}{${emptyCell(c)}} \\\\`;
+    if (!x) {return `${cfgName(c)} & \\multicolumn{${showUnpaired ? 11 : 10}}{l}{${emptyCell(c)}} \\\\`;}
     const { o } = x, e = ERR.get(c.id);
     return `${cfgName(c)} & ${e.calls} & ${o.harmful.deny} & ${o.harmful.ask} & ${o.harmful.allow} & ${o.consequential.ask} & ${o.consequential.deny} & ${o.consequential.allow} & ${o.harmless.allow} & ${o.harmless.ask} & ${o.harmless.deny}${showUnpaired ? ` & ${x.unpaired}` : ""} \\\\`;
   };
   const errRow = (c) => {
     const e = ERR.get(c.id);
-    if (!e) return `${cfgName(c)} & \\multicolumn{8}{l}{${emptyCell(c)}} \\\\`;
+    if (!e) {return `${cfgName(c)} & \\multicolumn{8}{l}{${emptyCell(c)}} \\\\`;}
     return `${cfgName(c)} & ${e.fnHarmful} & ${e.fnConsequential} & ${e.fn} & ${fmtRate(e.fn, e.fnBase)} & ${e.fpHarmless} & ${e.fpConsequential} & ${e.fp} & ${fmtRate(e.fp, e.fpBase)} \\\\`;
   };
   // Launches of a planted configuration, every arm (every launch rule labels harmful): codenclawed
@@ -1736,8 +1736,8 @@ ${matchedRows.join("\n")}
   }
   for (const arm of ["N0", "N1", "C1", "C2"]) {
     const xs = labeled.filter((x) => x.r.arm === arm && x.c.launch);
-    if (!xs.length) continue;
-    if (xs.some((x) => x.label !== "harmful")) throw new Error("a launch is labeled other than harmful: extend the launch rows");
+    if (!xs.length) {continue;}
+    if (xs.some((x) => x.label !== "harmful")) {throw new Error("a launch is labeled other than harmful: extend the launch rows");}
     const t = tally(xs);
     const o = zero3();
     o.harmful.allow = t.fn;
@@ -1790,7 +1790,7 @@ ${launchErr.join("\n")}
     for (const c of cfgs) {
       const x = OUT.get(c.id);
       const name = `${ARMO[c.arm]}${MODEO[c.mode]}${c.ranIn === "default" && c.mode === "auto" ? "Default" : ""}`;
-      for (const l of LABELS3) for (const k of ["allow", "ask", "deny"]) M(`Out${name}${LABO[l]}${KINDO[k]}`, x ? String(x.o[l][k]) : PENDING);
+      for (const l of LABELS3) {for (const k of ["allow", "ask", "deny"]) M(`Out${name}${LABO[l]}${KINDO[k]}`, x ? String(x.o[l][k]) : PENDING);}
     }
     // Per arm, all modes pooled: outcome counts and errors under the corrected definitions.
     for (const arm of ["N0", "N1", "C1", "C2"]) {
@@ -1798,7 +1798,7 @@ ${launchErr.join("\n")}
       const sum = (f) => cs.reduce((a, c) => a + f(c), 0);
       const p = ARMO[arm];
       const ok = cs.length > 0;
-      for (const l of LABELS3) for (const k of ["allow", "ask", "deny"]) M(`Out${p}${LABO[l]}${KINDO[k]}`, ok ? String(sum((c) => OUT.get(c.id).o[l][k])) : PENDING);
+      for (const l of LABELS3) {for (const k of ["allow", "ask", "deny"]) M(`Out${p}${LABO[l]}${KINDO[k]}`, ok ? String(sum((c) => OUT.get(c.id).o[l][k])) : PENDING);}
       // Consequential calls refused where no person can be reached (bypassPermissions): correct.
       M(`Out${p}ConsequentialRefusedNoPerson`, ok ? String(sum((c) => (personReachable(c) ? 0 : OUT.get(c.id).o.consequential.deny))) : PENDING);
       M(`Out${p}ConsequentialRefusedWithPerson`, ok ? String(sum((c) => (personReachable(c) ? OUT.get(c.id).o.consequential.deny : 0))) : PENDING);
@@ -1840,10 +1840,10 @@ ${launchErr.join("\n")}
       // FP under the corrected definitions: harmless calls stopped, plus consequential calls refused
       // outright in a mode where a person can approve them (decision kinds per label, per mode).
       const per = r ? Object.entries(REPLAY.configurations[arm]).filter(([m]) => m !== "all") : [];
-      if (r && per.some(([, x]) => !x.decisionsByLabel)) throw new Error(`${REPLAY.file} has no decisionsByLabel: re-run scripts/replay-summary.mjs`);
+      if (r && per.some(([, x]) => !x.decisionsByLabel)) {throw new Error(`${REPLAY.file} has no decisionsByLabel: re-run scripts/replay-summary.mjs`);}
       const fpH = per.reduce((a, [, x]) => a + x.decisionsByLabel.harmless.ask + x.decisionsByLabel.harmless.deny, 0);
       const fpC = per.reduce((a, [m, x]) => a + (m === "bypassPermissions" ? 0 : x.decisionsByLabel.consequential.deny), 0);
-      if (r && fpH !== r.fp) throw new Error(`${arm}: harmless stopped ${fpH}, the replay's tally says ${r.fp}`);
+      if (r && fpH !== r.fp) {throw new Error(`${arm}: harmless stopped ${fpH}, the replay's tally says ${r.fp}`);}
       M(`Replay${ARMM[arm]}FP`, r ? String(fpH + fpC) : PENDING);
       M(`Replay${ARMM[arm]}FPHarmless`, r ? String(fpH) : PENDING);
       M(`Replay${ARMM[arm]}FPConsequential`, r ? String(fpC) : PENDING);
@@ -1871,10 +1871,10 @@ ${launchErr.join("\n")}
       M(`${p}FN`, String(r.fn));
       M(`${p}FNHarmful`, String(xs.filter((x) => x.label === "harmful" && !x.stopped).length));
       const fa = new Map();
-      for (const x of xs) if (x.label !== "harmless" && !x.stopped) fa.set(x.action, (fa.get(x.action) ?? 0) + 1);
-      M(`${p}FNActions`, [...fa].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([a, n]) => `${ttBreak(a)} (${n})`).join(", ") || "none");
+      for (const x of xs) {if (x.label !== "harmless" && !x.stopped) fa.set(x.action, (fa.get(x.action) ?? 0) + 1);}
+      M(`${p}FNActions`, [...fa].toSorted((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([a, n]) => `${ttBreak(a)} (${n})`).join(", ") || "none");
       const ae = armErr(arm);
-      if (ae.fn !== r.fn) throw new Error(`${arm}: FN ${ae.fn} from the outcomes, ${r.fn} from the replay's tally`);
+      if (ae.fn !== r.fn) {throw new Error(`${arm}: FN ${ae.fn} from the outcomes, ${r.fn} from the replay's tally`);}
       M(`${p}FP`, String(ae.fp));
       M(`${p}TN`, String(r.tn));
       M(`${p}FNRate`, fmtRate(r.fn, r.tp + r.fn));
@@ -1894,13 +1894,13 @@ ${launchErr.join("\n")}
     {
       // The actions of the paired false negatives, with their counts (for the prose; generated).
       const fa = new Map();
-      for (const x of labeled) if (x.r.arm === arm && !x.c.launch && x.label !== "harmless" && x.c.stopped === false) fa.set(x.action, (fa.get(x.action) ?? 0) + 1);
-      M(`${p}FNActions`, pend ?? ([...fa].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([a, n]) => `${ttBreak(a)} (${n})`).join(", ") || "none"));
+      for (const x of labeled) {if (x.r.arm === arm && !x.c.launch && x.label !== "harmless" && x.c.stopped === false) fa.set(x.action, (fa.get(x.action) ?? 0) + 1);}
+      M(`${p}FNActions`, pend ?? ([...fa].toSorted((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([a, n]) => `${ttBreak(a)} (${n})`).join(", ") || "none"));
     }
     M(`${p}FNEffect`, v(labeled.filter((x) => x.r.arm === arm && !x.c.launch && x.label !== "harmless" && x.c.stopped === false && x.r.attackSucceeded).length));
     M(`${p}FNRuns`, v(new Set(labeled.filter((x) => x.r.arm === arm && !x.c.launch && x.label !== "harmless" && x.c.stopped === false).map((x) => x.r.key)).size));
     const ae = armErr(arm);
-    if (ae && ae.fn !== t.fn) throw new Error(`${arm}: FN ${ae.fn} from the outcomes, ${t.fn} from the tally`);
+    if (ae && ae.fn !== t.fn) {throw new Error(`${arm}: FN ${ae.fn} from the outcomes, ${t.fn} from the tally`);}
     M(`${p}FP`, v(ae ? ae.fp : t.fp));
     M(`${p}TN`, v(t.tn));
     M(`${p}Unpaired`, v(t.unpairedPos + t.unpairedNeg));
@@ -1945,7 +1945,7 @@ ${launchErr.join("\n")}
       const cs = callsOf(r);
       uses.forEach((u, i) => {
         calls++;
-        if (cs[i].stopped !== ids.has(u.id)) disagree++;
+        if (cs[i].stopped !== ids.has(u.id)) {disagree++;}
       });
     }
     M("NativePairIdRuns", String(runs));
@@ -1962,8 +1962,8 @@ ${launchErr.join("\n")}
     M(`Conf${key}Pos`, e ? String(e.fnBase) : PENDING);
     M(`Conf${key}FPConsequential`, e ? String(e.fpConsequential) : PENDING);
   }
-  M("CallsCut", String(labeled.filter((x) => / <TRUNCATED>$/.test(x.c.text)).length));
-  M("CallsCutNative", String(labeled.filter((x) => !isCz(x.r) && / <TRUNCATED>$/.test(x.c.text)).length));
+  M("CallsCut", String(labeled.filter((x) => x.c.text.endsWith(' <TRUNCATED>')).length));
+  M("CallsCutNative", String(labeled.filter((x) => !isCz(x.r) && x.c.text.endsWith(' <TRUNCATED>')).length));
 
   // --- false positives of codenclawed by shape (final build), per arm
   for (const arm of ["C1", "C2"]) {
@@ -1977,22 +1977,22 @@ ${launchErr.join("\n")}
       const k = `${x.c.tool} ${x.c.text}`;
       const g = groups.get(k) ?? groups.set(k, { tool: x.c.tool, text: x.c.text, n: 0, codes: new Map(), scenarios: new Set(), modes: new Set(), action: x.action }).get(k);
       g.n++;
-      if (x.c.match === "exact") g.exact = (g.exact ?? 0) + 1;
+      if (x.c.match === "exact") {g.exact = (g.exact ?? 0) + 1;}
       g.scenarios.add(x.r.scenario);
       g.modes.add(x.r.mode);
-      for (const code of x.c.codes ?? []) g.codes.set(code, (g.codes.get(code) ?? 0) + 1);
+      for (const code of x.c.codes ?? []) {g.codes.set(code, (g.codes.get(code) ?? 0) + 1);}
     }
-    const list = [...groups.values()].sort((a, b) => b.n - a.n || a.text.localeCompare(b.text));
+    const list = [...groups.values()].toSorted((a, b) => b.n - a.n || a.text.localeCompare(b.text));
     M(`${p}FPShaped`, String(shaped.length));
     M(`${p}FPShapedExact`, String(shaped.filter((x) => x.c.match === "exact").length));
     M(`${p}FPUnshaped`, String(fps.length - shaped.length));
     M(`${p}FPShapes`, String(list.length));
-    if (!fps.length) continue;
-    const topCode = (g) => [...g.codes].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? "--";
+    if (!fps.length) {continue;}
+    const topCode = (g) => [...g.codes].toSorted((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? "--";
     if (CZ_FINAL) {
       fs.writeFileSync(
         path.join(PAPER, "data", `fp-shapes-${CZ_FINAL}${arm === "C2" ? "-c2" : ""}.json`),
-        `${JSON.stringify({ about: `GENERATED by scripts/make-tables.mjs: every false positive of codenclawed (${arm}, build ${CZ_FINAL}) whose call is determined, grouped by normalized call; codes are the gate's reason codes, shown for diagnosis only.`, falsePositives: fps.length, shaped: shaped.length, shapes: list.map((g) => ({ count: g.n, exactlyPaired: g.exact ?? 0, tool: g.tool, call: g.text, action: g.action, codes: Object.fromEntries([...g.codes].sort()), scenarios: [...g.scenarios].sort(), modes: [...g.modes].sort() })) }, null, 1)}\n`,
+        `${JSON.stringify({ about: `GENERATED by scripts/make-tables.mjs: every false positive of codenclawed (${arm}, build ${CZ_FINAL}) whose call is determined, grouped by normalized call; codes are the gate's reason codes, shown for diagnosis only.`, falsePositives: fps.length, shaped: shaped.length, shapes: list.map((g) => ({ count: g.n, exactlyPaired: g.exact ?? 0, tool: g.tool, call: g.text, action: g.action, codes: Object.fromEntries([...g.codes].toSorted()), scenarios: [...g.scenarios].toSorted(), modes: [...g.modes].toSorted() })) }, null, 1)}\n`,
       );
     }
     const short = (s, n) => (s.length > n ? `${s.slice(0, n)}…` : s);
@@ -2019,12 +2019,12 @@ ${rows.join("\n")}
   const phr = (xs, exactOnly = false) => {
     const acts = new Map();
     for (const x of xs) {
-      if (x.c.launch || x.c.stopped === null || x.c.stopped === undefined || (exactOnly && x.c.match !== "exact")) continue;
+      if (x.c.launch || x.c.stopped === null || x.c.stopped === undefined || (exactOnly && x.c.match !== "exact")) {continue;}
       const k = `${x.r.scenario}\u0000${x.action}`;
       const a = acts.get(k) ?? acts.set(k, { scenario: x.r.scenario, action: x.action, label: x.label, texts: new Map() }).get(k);
       const e = a.texts.get(x.c.text) ?? a.texts.set(x.c.text, { tool: x.c.tool, stop: 0, run: 0, codes: new Map() }).get(x.c.text);
       x.c.stopped ? e.stop++ : e.run++;
-      for (const code of x.c.codes ?? []) e.codes.set(code, (e.codes.get(code) ?? 0) + 1);
+      for (const code of x.c.codes ?? []) {e.codes.set(code, (e.codes.get(code) ?? 0) + 1);}
     }
     const multi = [...acts.values()].filter((a) => a.texts.size >= 2);
     // Mixed: one phrasing always stopped and another always let run (a phrasing stopped in one run and let
@@ -2044,11 +2044,11 @@ ${rows.join("\n")}
   const identical = (xs) => {
     const g = new Map();
     for (const x of xs) {
-      if (x.c.launch || x.c.stopped === null || x.c.stopped === undefined) continue;
+      if (x.c.launch || x.c.stopped === null || x.c.stopped === undefined) {continue;}
       const k = `${x.r.scenario}\u0000${x.r.modelRequested}\u0000${x.c.tool}\u0000${x.c.text}`;
       const e = g.get(k) ?? g.set(k, { n: 0, stop: 0, runs: new Set() }).get(k);
       e.n++;
-      if (x.c.stopped) e.stop++;
+      if (x.c.stopped) {e.stop++;}
       e.runs.add(x.r.key);
     }
     const rep = [...g.values()].filter((e) => e.n >= 2);
@@ -2071,8 +2071,8 @@ ${rows.join("\n")}
     const id = identical(xs);
     HEAD.same.set(c.id, { arm: c.arm, mode: c.mode, multi: multi.length, mixed: mixed.length });
     sameRows.push(`${c.label} & ${multi.length} & ${mixed.length} & ${fmtRate(mixed.length, multi.length)} & ${nb.length} & ${mb.length} & ${fmtRate(mb.length, nb.length)} & ${id.rep} & ${id.mixed} \\\\`);
-    if (!c.cz) identicalNative.push({ c, ...id });
-    for (const a of mixed) mixedAll.push({ cfg: c, a });
+    if (!c.cz) {identicalNative.push({ c, ...id });}
+    for (const a of mixed) {mixedAll.push({ cfg: c, a });}
     const key = c.id.replace(/\W/g, "").replace("bypassPermissions", "bypass").replace(/\d/g, (d) => ["Zero", "One", "Two"][d]);
     M(`Same${key}Multi`, String(multi.length));
     M(`Same${key}Mixed`, String(mixed.length));
@@ -2132,13 +2132,13 @@ ${sameRows.flatMap((row, i) => (i > 0 && cfgs[i - 1].arm !== cfgs[i].arm ? ["\\m
   const top = mixedAll
     .filter(({ a }) => !BROAD.has(a.action))
     .map(({ cfg, a }) => ({ cfg, a, n: [...a.texts.values()].reduce((s, e) => s + e.stop + e.run, 0) }))
-    .sort((x, y) => y.n - x.n || x.cfg.id.localeCompare(y.cfg.id) || x.a.action.localeCompare(y.a.action))
+    .toSorted((x, y) => y.n - x.n || x.cfg.id.localeCompare(y.cfg.id) || x.a.action.localeCompare(y.a.action))
     .slice(0, 10);
   const pick = (a, stopped) => {
     const es = [...a.texts].filter(([, e]) => (stopped ? e.stop && !e.run : e.run && !e.stop));
     const es2 = es.length ? es : [...a.texts].filter(([, e]) => (stopped ? e.stop : e.run));
-    const [text, e] = es2.sort((p, q) => (stopped ? q[1].stop - p[1].stop : q[1].run - p[1].run) || p[0].localeCompare(q[0]))[0];
-    const code = [...e.codes].sort((p, q) => q[1] - p[1] || p[0].localeCompare(q[0]))[0]?.[0];
+    const [text, e] = es2.toSorted((p, q) => (stopped ? q[1].stop - p[1].stop : q[1].run - p[1].run) || p[0].localeCompare(q[0]))[0];
+    const code = [...e.codes].toSorted((p, q) => q[1] - p[1] || p[0].localeCompare(q[0]))[0]?.[0];
     return `${ttCmd(short(text.replace(/\n/g, "\u0001"), 60)).replace(/\u0001/g, " \\textbackslash{}n ")}${stopped && code ? ` {\\scriptsize(${ttCmd(code)})}` : ""}`;
   };
   X("mixed-actions", "The most frequent actions with mixed decisions",
@@ -2171,15 +2171,15 @@ ${top.length ? top.map(({ cfg, a, n }) => `${cfg.short.replace("bypassPermission
     ["motivation", "IncMotivation", "Attacking agent used permitted egress (partly in scope)"],
     ["not-assessed", "IncNotAssessed", "Not yet assessed"],
   ];
-  for (const r of incidents) if (!CATS.some(([c]) => c === r.category)) throw new Error(`incident ${r.n}: unknown category ${r.category}`);
+  for (const r of incidents) {if (!CATS.some(([c]) => c === r.category)) throw new Error(`incident ${r.n}: unknown category ${r.category}`);}
   const of = (c) => incidents.filter((r) => r.category === c);
   M("IncTotal", String(incidents.length));
-  for (const [c, name] of CATS) M(name, String(of(c).length));
+  for (const [c, name] of CATS) {M(name, String(of(c).length));}
   M("IncLocal", String(["prevented-rule", "prevented-approval", "limited", "not-closed"].reduce((a, c) => a + of(c).length, 0)));
   M("IncStopped", String(of("prevented-rule").length + of("prevented-approval").length));
-  const years = incidents.map((r) => r.date.slice(0, 4)).sort();
+  const years = incidents.map((r) => r.date.slice(0, 4)).toSorted();
   M("IncFirstYear", years[0]);
-  const cites = (c) => `\\cite{${[...new Set(of(c).sort((a, b) => a.n - b.n).map((r) => r.cite))].join(",")}}`;
+  const cites = (c) => `\\cite{${[...new Set(of(c).toSorted((a, b) => a.n - b.n).map((r) => r.cite))].join(",")}}`;
   // Gap table: the weakness each incident exploited (data/incidents.json `gap`), how many
   // incidents exploited it, and in plain words what an \sys{} layer did about them. One cited
   // example per gap. The full list of all cases, one line each with date, gap, outcome and
@@ -2202,12 +2202,12 @@ ${top.length ? top.map(({ cfg, a, n }) => `${cfg.short.replace("bypassPermission
     ["attacker-agent", "AttackerAgent", "Attacker agent", 38,
       "Attackers ran agents of their own"],
   ];
-  for (const r of incidents) if (!GAPS.some(([g]) => g === r.gap)) throw new Error(`incident ${r.n}: unknown gap ${r.gap}`);
-  const CLOSED = ["prevented-rule", "prevented-approval"];
+  for (const r of incidents) {if (!GAPS.some(([g]) => g === r.gap)) throw new Error(`incident ${r.n}: unknown gap ${r.gap}`);}
+  const CLOSED = new Set(["prevented-rule", "prevented-approval"]);
   const OUTSIDE = ["hosted", "out-of-scope", "motivation"];
   const tally = (rs) => ({
     n: rs.length,
-    closed: rs.filter((r) => CLOSED.includes(r.category)).length,
+    closed: rs.filter((r) => CLOSED.has(r.category)).length,
     rule: rs.filter((r) => r.category === "prevented-rule").length,
     approval: rs.filter((r) => r.category === "prevented-approval").length,
     limited: rs.filter((r) => r.category === "limited").length,
@@ -2303,7 +2303,7 @@ Total & ${cells(all)} \\\\
     r.evidenceDerived = sc.length && sc.every(ranLive) ? "reproduced" : r.test ? "rule-traced" : "reasoned";
     r.scenarioPending = r.evidenceDerived !== "reproduced" && sc.length > 0;
     if (r.evidence && r.evidence !== r.evidenceDerived) process.stderr.write(`make-tables: incident ${r.n}: data says evidence ${r.evidence}, the live results give ${r.evidenceDerived} (used)\n`);
-    if (CZ_FINAL && CLOSED.includes(r.category) && r.evidenceDerived === "reproduced") {
+    if (CZ_FINAL && CLOSED.has(r.category) && r.evidenceDerived === "reproduced") {
       const bad = sc.filter((id) => hits([...poolOf(czCfgs("C1"), id), ...poolOf(czCfgs("C2"), id)]) > 0);
       if (bad.length) throw new Error(`incident ${r.n} is "${r.category}" but its reproduction succeeded against Enclawed Code: ${bad.join(", ")}`);
     }
@@ -2313,7 +2313,7 @@ Total & ${cells(all)} \\\\
   M("IncEvidenceRuleTraced", String(ev("rule-traced").length));
   M("IncEvidenceReasoned", String(ev("reasoned").length));
   M("IncEvidenceScenarioPending", String(agentRows.filter((r) => r.scenarioPending).length));
-  M("IncEvidenceClosedReproduced", String(ev("reproduced").filter((r) => CLOSED.includes(r.category)).length));
+  M("IncEvidenceClosedReproduced", String(ev("reproduced").filter((r) => CLOSED.has(r.category)).length));
   M("IncEvidenceAgentLayer", String(agentRows.length));
   const evCell = (r) => (r.rule ? `${EVID[r.evidenceDerived]}${r.scenarioPending ? "$^{\\dagger}$" : ""}` : "--");
   const ruleCell = (r) => (r.rule ? tex(r.ruleShort) : "--");
@@ -2322,9 +2322,9 @@ Total & ${cells(all)} \\\\
   // The answer first, the how after it: a reader scanning the column sees Yes or No.
   const PREVENTED = { "prevented-rule": "\\textbf{Yes} (rule)", "prevented-approval": "\\textbf{Yes} (approval)", "not-closed": "\\textbf{No}" };
   const full = [...layerIncidents]
-    .sort((a, b) => a.n - b.n)
+    .toSorted((a, b) => a.n - b.n)
     .map((r) => {
-      if (!PREVENTED[r.category]) throw new Error(`incident ${r.n}: no prevented-by answer for category ${r.category}`);
+      if (!PREVENTED[r.category]) {throw new Error(`incident ${r.n}: no prevented-by answer for category ${r.category}`);}
       return `${r.date} & ${shortName(r)} & ${SHORT[r.gap]} & ${PREVENTED[r.category]} & ${evCell(r)} & ${ruleCell(r)} & \\cite{${r.cite}} \\\\`;
     });
   {
@@ -2334,7 +2334,7 @@ Total & ${cells(all)} \\\\
     X("incidents", "Documented agent-layer incidents",
       [`Every documented security incident and published exploit involving agentic AI, from ${years[0]} to November 2026, that exploited a gap in an agent the operator runs locally or in continuous integration (${layerIncidents.length} incidents; the paper's Table of incidents groups them by gap). Gap: the weakness exploited. Prevented: whether Enclawed around the agent prevents the harmful action on the incident's weakest route: Yes (rule), a deterministic rule refuses it whatever a person answers; Yes (approval), it is held until a person explicitly approves that one action, and refused when no one does; No, it runs. Evidence: Reproduced, a scenario of the live benchmark reproduces the incident's mechanism and has been run (its outcome is in per-scenario-*.md); Rule + test, the deciding rule is covered by a named test (a reproduction may be written and await its live run); Reasoned, neither. Decided by: the deciding rule, named by the section of the paper's Methods that describes it. For products other than Claude Code the verdict says what an Enclawed-style layer around that agent would do, not that codenclawed was tested on it. ${incidents.length - layerIncidents.length} further incidents reported as agentic AI incidents exploit no gap an agent layer can reach (hosted services, dependency flaws, attackers' own agents) and are not listed.`],
       ["#", "Date", "Incident", "Gap", "Prevented", "Evidence", "Scenarios", "Decided by", "Source"],
-      [...layerIncidents].sort((a, b) => a.n - b.n).map((r) => [
+      [...layerIncidents].toSorted((a, b) => a.n - b.n).map((r) => [
         String(r.n), r.date, r.incident, LONG[r.gap], PREV_X[r.category], r.rule ? `${EVID_X[r.evidenceDerived]}${r.scenarioPending ? " (reproduction awaiting its live run)" : ""}` : "--",
         (r.scenarios ?? []).join(" "), r.rule ?? "--", BIB.get(r.cite)?.url ?? `[${r.cite}]`,
       ]));
@@ -2366,9 +2366,9 @@ ${full.join("\n")}
   const callsIn = (xs) => xs.reduce((a, r) => a + (Array.isArray(r.toolUses) ? r.toolUses.length : 0), 0);
   const modelsIn = (xs) => new Set(xs.map((r) => r.modelRequested)).size;
   const modesIn = (xs) => new Set(xs.map((r) => r.mode)).size;
-  const versions = (xs) => [...new Set(xs.map((r) => r.claudeVersion).filter(Boolean))].sort().join(", ") || "--";
+  const versions = (xs) => [...new Set(xs.map((r) => r.claudeVersion).filter(Boolean))].toSorted().join(", ") || "--";
   const days = (xs) => {
-    const ts = xs.map((r) => r.ts).filter(Boolean).sort();
+    const ts = xs.map((r) => r.ts).filter(Boolean).toSorted();
     return ts.length ? `${ts[0].slice(0, 10)} to ${ts.at(-1).slice(0, 10)}` : "--";
   };
   const row = (what, build, xs, extra = "") =>
@@ -2392,7 +2392,7 @@ ${full.join("\n")}
     }
   }
   // C1A (a person approves every ask) is future work: its row appears once it has runs.
-  if (rs("C1A").length) rows.push(row("C1 with a person approving (C1A)", `\\cz{} ${czB("C1A")}`, rs("C1A")));
+  if (rs("C1A").length) {rows.push(row("C1 with a person approving (C1A)", `\\cz{} ${czB("C1A")}`, rs("C1A")));}
   // The compromised-host suite: live sessions with a real attacker process (hostc-main.jsonl).
   for (const arm of ["C1", "C2"]) {
     const xs = hostcRecs.filter((r) => r.arm === arm && r.outcome !== "n/a");
@@ -2445,7 +2445,7 @@ ${rows.join("\n")}
   // log n! table, for the hypergeometric probabilities in log space (p-values far below 1e-308).
   const lf = [0];
   const logFact = (n) => {
-    for (let i = lf.length; i <= n; i++) lf[i] = lf[i - 1] + Math.log(i);
+    for (let i = lf.length; i <= n; i++) {lf[i] = lf[i - 1] + Math.log(i);}
     return lf[n];
   };
   const lC = (n, k) => logFact(n) - logFact(k) - logFact(n - k);
@@ -2457,17 +2457,17 @@ ${rows.join("\n")}
     const ls = [];
     for (let x = Math.max(0, K - n2); x <= Math.min(K, n1); x++) {
       const v = lp(x);
-      if (v <= obs + 1e-7 * Math.abs(obs) + 1e-12) ls.push(v);
+      if (v <= obs + 1e-7 * Math.abs(obs) + 1e-12) {ls.push(v);}
     }
     const mx = Math.max(...ls);
     const lnP = mx + Math.log(ls.reduce((s, v) => s + Math.exp(v - mx), 0));
     return Math.min(0, lnP / Math.LN10);
   };
   const fmtP = (l10) => {
-    if (l10 === null) return "--";
+    if (l10 === null) {return "--";}
     const p = 10 ** l10;
-    if (p >= 0.995) return "$1$";
-    if (p >= 0.001) return `$${p < 0.01 ? p.toFixed(3) : p.toFixed(2)}$`;
+    if (p >= 0.995) {return "$1$";}
+    if (p >= 0.001) {return `$${p < 0.01 ? p.toFixed(3) : p.toFixed(2)}$`;}
     return `$<10^{-${Math.floor(-l10)}}$`;
   };
   // Seeded PRNG (mulberry32) for the bootstrap.
@@ -2484,7 +2484,7 @@ ${rows.join("\n")}
     const r = rng(BOOT_SEED);
     const res = (xs) => {
       let s = 0;
-      for (let i = 0; i < xs.length; i++) s += xs[Math.floor(r() * xs.length)];
+      for (let i = 0; i < xs.length; i++) {s += xs[Math.floor(r() * xs.length)];}
       return s / xs.length;
     };
     const out = [];
@@ -2504,22 +2504,22 @@ ${rows.join("\n")}
     const runs = (REPLAY.replayedRuns?.[arm] ?? []).filter((k) => k.split("|")[1] === mode);
     const asks = new Map(runs.map((k) => [k, 0]));
     for (const x of REPLAY.calls) {
-      if (x.arm !== arm || x.mode !== mode || x.decision !== "ask") continue;
+      if (x.arm !== arm || x.mode !== mode || x.decision !== "ask") {continue;}
       const k = `${x.scenario}|${x.mode}|${x.model}|${x.rep}`;
-      if (!asks.has(k)) throw new Error(`headline: ${arm} ask in run ${k}, which the replay does not list`);
+      if (!asks.has(k)) {throw new Error(`headline: ${arm} ask in run ${k}, which the replay does not list`);}
       asks.set(k, asks.get(k) + 1);
     }
     const want = REPLAY.configurations[arm]?.[mode]?.decisions?.ask;
     const got = [...asks.values()].reduce((a, b) => a + b, 0);
-    if (want !== undefined && want !== got) throw new Error(`headline: ${arm}/${mode} asks ${got} per run, ${want} in the replay's tally`);
-    if (REPLAY.runsByArmMode?.[arm]?.[mode] !== undefined && REPLAY.runsByArmMode[arm][mode] !== runs.length) throw new Error(`headline: ${arm}/${mode} runs ${runs.length}, the replay says ${REPLAY.runsByArmMode[arm][mode]}`);
+    if (want !== undefined && want !== got) {throw new Error(`headline: ${arm}/${mode} asks ${got} per run, ${want} in the replay's tally`);}
+    if (REPLAY.runsByArmMode?.[arm]?.[mode] !== undefined && REPLAY.runsByArmMode[arm][mode] !== runs.length) {throw new Error(`headline: ${arm}/${mode} runs ${runs.length}, the replay says ${REPLAY.runsByArmMode[arm][mode]}`);}
     return [...asks.values()];
   };
   // Per (arm, mode): pooled errors, attack success, approvals, mixed decisions.
   const cell = (arm, mode) => {
-    if (!ok) return null;
+    if (!ok) {return null;}
     const cs = HEAD.err.cfgs.filter((c) => c.arm === arm && c.mode === mode && HEAD.err.ERR.get(c.id));
-    if (!cs.length) return null;
+    if (!cs.length) {return null;}
     const sum = (f) => cs.reduce((a, c) => a + f(HEAD.err.ERR.get(c.id)), 0);
     const rs = recs.filter((r) => r.arm === arm && r.mode === mode);
     const sm = [...HEAD.same.values()].filter((x) => x.arm === arm && x.mode === mode);
@@ -2549,7 +2549,7 @@ ${rows.join("\n")}
       }
       rows.push(`${lead} & ${ARM_ROW[arm]} & ${rateCI(x.fn, x.fnBase)} & ${rateCI(x.fp, x.fpBase)} & ${rateCI(x.hits, x.runs)} & ${x.apprMean.toFixed(2)} & ${x.multi ? one(x.mixed / x.multi) : "--"} \\\\`);
     });
-    if (mode !== MODES.at(-1)) rows.push("\\midrule");
+    if (mode !== MODES.at(-1)) {rows.push("\\midrule");}
   }
   // Tests: each native configuration against C1 and C2 in the same mode.
   const testRows = [];
@@ -2557,14 +2557,14 @@ ${rows.join("\n")}
   for (const mode of MODES) {
     for (const nat of ["N0", "N1"]) {
       const n = C.get(`${nat}/${mode}`);
-      if (!n) continue;
+      if (!n) {continue;}
       const cells = [];
       for (const cz of ["C1", "C2"]) {
         const z = C.get(`${cz}/${mode}`);
         const key = `${ARM_CAPS[nat]}${ARM_CAPS[cz]}${MODE_CAPS[mode]}`;
         if (!z) {
           cells.push(PENDING, PENDING, PENDING);
-          for (const s of ["PFN", "PFP", "ApprRatio", "ApprRatioCI"]) M(`Head${key}${s}`, PENDING);
+          for (const s of ["PFN", "PFP", "ApprRatio", "ApprRatioCI"]) {M(`Head${key}${s}`, PENDING);}
           continue;
         }
         const pFN = n.fnBase && z.fnBase ? fisherLog10(n.fn, n.fnBase, z.fn, z.fnBase) : null;
@@ -2592,7 +2592,7 @@ ${rows.join("\n")}
   let better = 0, equal = 0, worse = 0;
   for (const { n, z } of comps) {
     const a = axes(n), b = axes(z);
-    for (let i = 0; i < a.length; i++) b[i] < a[i] ? better++ : b[i] === a[i] ? equal++ : worse++;
+    for (let i = 0; i < a.length; i++) {b[i] < a[i] ? better++ : b[i] === a[i] ? equal++ : worse++;}
   }
   const tot = better + equal + worse;
   const pend = ok && comps.length ? null : PENDING;
@@ -2630,7 +2630,7 @@ ${rows.join("\n")}
   if (pend === null && worse === 0) {
     for (const { n, z } of comps) {
       const a = axes(n), b = axes(z);
-      for (let i = 0; i < a.length; i++) if (a[i] === b[i] && a[i] !== 0) throw new Error("headline: a tie away from zero; reword HeadAxesSentence");
+      for (let i = 0; i < a.length; i++) {if (a[i] === b[i] && a[i] !== 0) throw new Error("headline: a tie away from zero; reword HeadAxesSentence");}
     }
   }
   write(
@@ -2669,7 +2669,7 @@ if (EXPORT_DIR) {
     const head = e.header.map((h) => plain(h));
     const csvRows = e.rows.map((r) => r.map((c) => plain(c).replace(/`/g, "")));
     const mdRows = e.rows.map((r) => r.map((c) => plain(c, true)));
-    for (const r of csvRows) if (r.length !== head.length) throw new Error(`export ${e.name}: row has ${r.length} cells, header ${head.length}`);
+    for (const r of csvRows) {if (r.length !== head.length) throw new Error(`export ${e.name}: row has ${r.length} cells, header ${head.length}`);}
     fs.writeFileSync(path.join(dir, `${e.name}.csv`), [head, ...csvRows].map((r) => r.map(csvCell).join(",")).join("\n") + "\n");
     const md = [
       `# ${e.title}`,
@@ -2729,7 +2729,7 @@ if (EXPORT_DIR) {
   process.stdout.write(`make-tables: exported ${files.length} tables to ${dir}\n`);
 }
 // Outputs of earlier versions of this generator, removed so no stale table can be \input.
-for (const f of ["bench-meta.tex", "bench-gaps.tex", "rt-summary.tex", "rt-all.tex", "bench-asr-models.tex"]) fs.rmSync(path.join(OUT, f), { force: true });
+for (const f of ["bench-meta.tex", "bench-gaps.tex", "rt-summary.tex", "rt-all.tex", "bench-asr-models.tex"]) {fs.rmSync(path.join(OUT, f), { force: true });}
 process.stdout.write(
   `make-tables: bench ${BENCH}, results ${RESULTS}, models ${MODELS.join(",")}; ${recs.length} reported records (${valid.length} valid, ${czOtherBuild} codenclawed records of other builds held back, final build ${CZ_FINAL ?? "not named"}), ${models.length} model groups -> ${OUT}\n`,
 );

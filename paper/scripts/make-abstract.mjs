@@ -18,7 +18,7 @@ const LIMIT = 1500;
 // \newcommand{\Name}{value} with one level of nested braces in the value.
 const macros = new Map();
 for (const src of [read("paper.tex"), read("generated/bench-macros.tex")]) {
-  for (const m of src.matchAll(/\\newcommand\{\\([A-Za-z]+)\}(?:\[\d\])?\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g)) macros.set(m[1], m[2]);
+  for (const m of src.matchAll(/\\newcommand\{\\([A-Za-z]+)\}(?:\[\d\])?\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g)) {macros.set(m[1], m[2]);}
 }
 
 let body = read("abstract.tex");
@@ -29,7 +29,7 @@ body = body.replace(/\\begin\{abstract\}|\\end\{abstract\}|\\noindent/g, "");
 for (let i = 0; i < 10; i++) {
   const before = body;
   body = body.replace(/\\([A-Za-z]+)(\{\})?/g, (all, name) => (macros.has(name) ? macros.get(name) : all));
-  if (body === before) break;
+  if (body === before) {break;}
 }
 
 // LaTeX to plain text.
@@ -48,14 +48,14 @@ const plain = body
   .trim();
 
 const problems = [];
-if (/[^\x20-\x7e]/.test(plain)) problems.push(`non-ASCII characters: ${[...new Set(plain.match(/[^\x20-\x7e]/g))].join(" ")}`);
-if (/[\\{}$^]/.test(plain)) problems.push(`LaTeX left over: ${plain.match(/.{0,20}[\\{}$^].{0,20}/)[0]}`);
-if (/pending/.test(plain)) problems.push("a pending value reached the abstract");
-if (plain.length > LIMIT) problems.push(`${plain.length} characters (limit ${LIMIT})`);
+if (/[^\x20-\x7e]/.test(plain)) {problems.push(`non-ASCII characters: ${[...new Set(plain.match(/[^\x20-\x7e]/g))].join(" ")}`);}
+if (/[\\{}$^]/.test(plain)) {problems.push(`LaTeX left over: ${plain.match(/.{0,20}[\\{}$^].{0,20}/)[0]}`);}
+if (/pending/.test(plain)) {problems.push("a pending value reached the abstract");}
+if (plain.length > LIMIT) {problems.push(`${plain.length} characters (limit ${LIMIT})`);}
 
 fs.writeFileSync(path.join(PAPER, "abstract-arxiv.txt"), `${plain}\n`);
 process.stdout.write(`make-abstract: ${plain.length} characters, ${problems.length ? "FAILED" : "ASCII, no math"} -> abstract-arxiv.txt\n`);
 if (problems.length) {
-  for (const p of problems) process.stderr.write(`make-abstract: ${p}\n`);
+  for (const p of problems) {process.stderr.write(`make-abstract: ${p}\n`);}
   process.exit(1);
 }

@@ -50,14 +50,14 @@ export function parseInput(raw) {
       } catch {
         v = s;
       }
-    } else v = JSON.parse(v);
-    if (!(m[1] in obj)) obj[m[1]] = v;
+    } else {v = JSON.parse(v);}
+    if (!(m[1] in obj)) {obj[m[1]] = v;}
   }
   return { obj, truncated: true };
 }
 
 const sortKeys = (x) =>
-  Array.isArray(x) ? x.map(sortKeys) : x && typeof x === "object" ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, sortKeys(x[k])])) : x;
+  Array.isArray(x) ? x.map(sortKeys) : x && typeof x === "object" ? Object.fromEntries(Object.keys(x).toSorted().map((k) => [k, sortKeys(x[k])])) : x;
 
 // Replace run-specific strings by placeholders. `r` is the result record.
 export function normalizeText(s, r) {
@@ -80,8 +80,8 @@ export function normalizeText(s, r) {
   // Cut prefixes of the scratch path at the end of a truncated input.
   t = t.replace(/\/tmp\/claude-1000\/-[\w-]*$/, "<SCRATCH>");
   t = t.replace(/\/home\/[a-z_][a-z0-9_-]*(?=\/|\b)/g, "~");
-  if (r.nonce) t = t.split(String(r.nonce)).join("<NONCE>");
-  if (r.homeNonce) t = t.split(String(r.homeNonce)).join("<HOMENONCE>");
+  if (r.nonce) {t = t.split(String(r.nonce)).join("<NONCE>");}
+  if (r.homeNonce) {t = t.split(String(r.homeNonce)).join("<HOMENONCE>");}
   t = t.replace(/\b(127\.0\.0\.1|localhost|0\.0\.0\.0|\[::1\]):\d{2,5}\b/g, "$1:<PORT>");
   return t;
 }
@@ -137,11 +137,11 @@ export function reorderSpan(runs) {
   for (const { uses, decs } of runs) {
     const u = uses.map((x) => x.name);
     const d = decs.map((x) => x.tool);
-    if (u.length !== d.length || u.join("\u0000") === d.join("\u0000")) continue;
+    if (u.length !== d.length || u.join("\u0000") === d.join("\u0000")) {continue;}
     const cu = new Map();
-    for (const x of u) cu.set(x, (cu.get(x) ?? 0) + 1);
-    for (const x of d) cu.set(x, (cu.get(x) ?? 0) - 1);
-    if ([...cu.values()].some((v) => v !== 0)) continue;
+    for (const x of u) {cu.set(x, (cu.get(x) ?? 0) + 1);}
+    for (const x of d) {cu.set(x, (cu.get(x) ?? 0) - 1);}
+    if ([...cu.values()].some((v) => v !== 0)) {continue;}
     const bal = new Map();
     let start = 0;
     for (let i = 0; i < u.length; i++) {
@@ -160,7 +160,7 @@ export function resolveCz(calls, decisions, labelOf, shapeOfCall, W = 5) {
   if (decisions.length && decisions.every((d) => d.toolUseId) && calls.every((c) => c.launch || c.id)) {
     const byId = new Map(decisions.map((d) => [d.toolUseId, d]));
     for (const c of calls) {
-      if (c.launch) continue;
+      if (c.launch) {continue;}
       const d = byId.get(c.id);
       Object.assign(c, d ? { stopped: isStopped(d), match: "exact", decision: d.decision, codes: d.codes ?? [] } : { stopped: null, match: "unmatched", decision: null, codes: [] });
     }
@@ -168,11 +168,11 @@ export function resolveCz(calls, decisions, labelOf, shapeOfCall, W = 5) {
   }
   const byTool = new Map();
   calls.forEach((c, i) => {
-    if (c.launch) return;
+    if (c.launch) {return;}
     (byTool.get(c.tool) ?? byTool.set(c.tool, { idx: [], decs: [] }).get(c.tool)).idx.push(i);
   });
-  for (const d of decisions) byTool.get(d.tool)?.decs.push(d);
-  const codesOf = (ds) => [...new Set(ds.flatMap((d) => d.codes ?? []))].sort();
+  for (const d of decisions) {byTool.get(d.tool)?.decs.push(d);}
+  const codesOf = (ds) => [...new Set(ds.flatMap((d) => d.codes ?? []))].toSorted();
   for (const [, g] of byTool) {
     if (g.decs.length === g.idx.length) {
       g.idx.forEach((i, k) => {
@@ -189,7 +189,7 @@ export function resolveCz(calls, decisions, labelOf, shapeOfCall, W = 5) {
         if (labels.size === 1) {
           const d = g.decs[k];
           Object.assign(calls[i], { stopped: isStopped(d), match: shapes.size === 1 ? "exact" : "count", decision: isStopped(d) ? "stopped" : "allow", codes: codesOf([d]) });
-        } else Object.assign(calls[i], { stopped: null, match: "ambiguous", decision: null, codes: [] });
+        } else {Object.assign(calls[i], { stopped: null, match: "ambiguous", decision: null, codes: [] });}
       });
       continue;
     }
@@ -205,7 +205,7 @@ export function resolveCz(calls, decisions, labelOf, shapeOfCall, W = 5) {
     } else if (g.decs.length < g.idx.length && new Set(pols).size <= 1 && g.decs.length) {
       // All decisions agree; the calls without one are unmatched, but which they are is unknown.
       g.idx.forEach((i, k) => Object.assign(calls[i], { stopped: null, match: "ambiguous", decision: null, codes: [] }));
-    } else for (const i of g.idx) Object.assign(calls[i], { stopped: null, match: "ambiguous", decision: null, codes: [] });
+    } else {for (const i of g.idx) Object.assign(calls[i], { stopped: null, match: "ambiguous", decision: null, codes: [] });}
   }
   return calls;
 }
@@ -241,7 +241,7 @@ export function callsOf(r) {
     if (c) {
       c.stopped = true;
       c.decision = "denied";
-    } else unpaired++;
+    } else {unpaired++;}
   }
   out.unpairedDenials = unpaired;
   return out;
@@ -262,15 +262,15 @@ export function expandDefs(defs = {}) {
   const out = {};
   const busy = new Set();
   const get = (k) => {
-    if (k in out) return out[k];
-    if (!(k in defs)) throw new Error(`call-truth: unknown def ${k}`);
-    if (busy.has(k)) throw new Error(`call-truth: def cycle at ${k}`);
+    if (k in out) {return out[k];}
+    if (!(k in defs)) {throw new Error(`call-truth: unknown def ${k}`);}
+    if (busy.has(k)) {throw new Error(`call-truth: def cycle at ${k}`);}
     busy.add(k);
     out[k] = defs[k].replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, n) => get(n));
     busy.delete(k);
     return out[k];
   };
-  for (const k of Object.keys(defs)) get(k);
+  for (const k of Object.keys(defs)) {get(k);}
   return out;
 }
 
@@ -279,15 +279,15 @@ export function compileRules(json) {
   const re = (s, flags = "") => (s.startsWith("/") && s.lastIndexOf("/") > 0 ? new RegExp(s.slice(1, s.lastIndexOf("/")), flags || s.slice(s.lastIndexOf("/") + 1)) : null);
   const ids = new Set();
   return json.rules.map((x, i) => {
-    if (!x.id || ids.has(x.id)) throw new Error(`call-truth rule ${i}: missing or duplicate id ${x.id}`);
+    if (!x.id || ids.has(x.id)) {throw new Error(`call-truth rule ${i}: missing or duplicate id ${x.id}`);}
     ids.add(x.id);
-    if (!LABELS.includes(x.label)) throw new Error(`call-truth rule ${x.id}: bad label ${x.label}`);
-    if (!x.reason || x.reason.length < 10) throw new Error(`call-truth rule ${x.id}: no reason`);
-    if (!x.action) throw new Error(`call-truth rule ${x.id}: no action`);
+    if (!LABELS.includes(x.label)) {throw new Error(`call-truth rule ${x.id}: bad label ${x.label}`);}
+    if (!x.reason || x.reason.length < 10) {throw new Error(`call-truth rule ${x.id}: no reason`);}
+    if (!x.action) {throw new Error(`call-truth rule ${x.id}: no action`);}
     const toolRe = re(x.tool);
     const scRe = x.scenario ? re(x.scenario) : null;
     const src = x.match.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, n) => {
-      if (!(n in defs)) throw new Error(`call-truth rule ${x.id}: unknown def ${n}`);
+      if (!(n in defs)) {throw new Error(`call-truth rule ${x.id}: unknown def ${n}`);}
       return defs[n];
     });
     const m = new RegExp(src, "s");
@@ -302,7 +302,7 @@ export function compileRules(json) {
       // call also runs the fixture's tests.
       actionOf: (text) => {
         let a = x.actionEdits && srcEdit && srcEdit.test(text) ? x.actionEdits : x.action;
-        if (["inspect", "edit-tracked-src", "format-tracked-src"].includes(a) && testRun && testRun.test(text)) a += "+run-tests";
+        if (["inspect", "edit-tracked-src", "format-tracked-src"].includes(a) && testRun && testRun.test(text)) {a += "+run-tests";}
         return a;
       },
       test: (tool, scenario, text) =>
@@ -312,7 +312,7 @@ export function compileRules(json) {
 }
 
 export function labelCall(rules, scenario, call) {
-  for (const rule of rules) if (rule.test(call.tool, scenario, call.text)) return rule;
+  for (const rule of rules) {if (rule.test(call.tool, scenario, call.text)) return rule;}
   return null;
 }
 

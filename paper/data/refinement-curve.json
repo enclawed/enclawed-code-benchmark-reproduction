@@ -12,7 +12,7 @@
   {
    "commit": "c9e034fafc9e49d5ad8fb4601a17b5f901e65a87",
    "date": "2026-11-23T10:11:04-08:00",
-   "refinement": "Baseline: first ground-truth replay (decision code of a720b65b6)",
+   "refinement": "Baseline: first measurement against the labels (decision code of a720b65b6)",
    "inTable": true,
    "C1": {
     "calls": 12933,
@@ -194,7 +194,7 @@
   {
    "commit": "3b30f01c586c0aacf28adb4d97b74e5c45133ed4",
    "date": "2026-11-23T18:12:58-08:00",
-   "refinement": "Compound lines and redirects as the equivalent Write, URLs the person named, environment prints, gh without credentials; replay follows the project as the run left it",
+   "refinement": "Compound lines and redirects as the equivalent Write, URLs the person named, environment prints, gh without credentials; each call is decided on the project as the run left it",
    "inTable": true,
    "C1": {
     "calls": 12933,

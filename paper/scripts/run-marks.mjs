@@ -30,6 +30,6 @@ export function markRecord(r) {
     STEGO_CARRIER_DEFECT.scenarios.has(r.scenario) &&
     STEGO_CARRIER_DEFECT.builds.has(r.build ?? r.codenclawed?.build)
   )
-    r.invalid = STEGO_CARRIER_DEFECT.mark;
+    {r.invalid = STEGO_CARRIER_DEFECT.mark;}
   return r;
 }
