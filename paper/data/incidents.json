@@ -1,0 +1,1174 @@
+{
+ "source": "research/intro-evidence.md, incident survey (rows 1-75); category per its counts section; gap = the weakness exploited, per the same section; rule/code/test/scenarios/evidence per agent-layer row: code paths and tests are in the codenclawed repository (enclawde-cli), scenarios in the benchmark catalog (codenclawed-bench); evidence is re-derived by scripts/make-tables.mjs from the live results; agentLayerSteps/outOfScopeSteps/closingFix follow compliance/limited-incidents-closure-plan.md (M1-M9); rule/code/test/scenarios/evidence per agent-layer row: code paths and tests are in the codenclawed repository (enclawde-cli), scenarios in the benchmark catalog (codenclawed-bench); evidence is re-derived by scripts/make-tables.mjs from the live results; agentLayerSteps/outOfScopeSteps/closingFix follow compliance/limited-incidents-closure-plan.md (M1-M9)",
+ "incidents": [
+  {
+   "n": 1,
+   "date": "2023-04",
+   "incident": "LangChain LLMMathChain RCE, CVE-2023-29374",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "nvd202329374"
+  },
+  {
+   "n": 2,
+   "date": "2024-03",
+   "incident": "ChatGPT plugin OAuth flaws (Salt Labs)",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "salt2024plugins"
+  },
+  {
+   "n": 3,
+   "date": "2024-08",
+   "incident": "Slack AI private-channel exfiltration (PromptArmor)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "promptarmor2024slack"
+  },
+  {
+   "n": 4,
+   "date": "2024-10",
+   "incident": "LangChain GraphCypherQAChain, CVE-2024-8309",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "nvd20248309"
+  },
+  {
+   "n": 5,
+   "date": "2025-05",
+   "incident": "GitHub MCP private-repo leak (Invariant)",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "invariant2025ghmcp",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (the same irreversible(): denied with no person)",
+   "scenarios": [
+    "inc05-github-mcp-toxic-flow"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 6,
+   "date": "2025-06",
+   "incident": "Asana MCP cross-org exposure",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "lyons2025asana"
+  },
+  {
+   "n": 7,
+   "date": "2025-06",
+   "incident": "MCP Inspector drive-by RCE, CVE-2025-49596",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "oligo2025inspector"
+  },
+  {
+   "n": 8,
+   "date": "2025-06/10",
+   "incident": "Smithery MCP hosting path traversal",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "gitguardian2025smithery"
+  },
+  {
+   "n": 9,
+   "date": "2025-07",
+   "incident": "Filesystem MCP symlink escape, CVE-2025-53109",
+   "verdict": "Pt",
+   "category": "prevented-approval",
+   "gap": "mcp-server",
+   "cite": "nvd202553109",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied; the server runs contained, so a write through a symbolic link (or into a prefix sibling) out of its declared root is refused",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/containment/mcp.ts containMcpServer (the server's declared roots)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\"; enclawed-oss src/enclawed/containment/containment.attack.test.ts \"row 9: a symlink (or prefix sibling) out of the declared root is refused; the target is untouched\"",
+   "scenarios": [
+    "inc09-fs-mcp-symlink-escape"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "the agent's write_file call through the MCP server (asks today; denied when no person can answer)",
+    "resolving the path argument to its real target before the call (M4 argument roles)",
+    "the server's own open(2) following the link out of its directory (M1 filesystem view)"
+   ],
+   "outOfScopeSteps": [],
+   "closingFix": [
+    "M1",
+    "M4"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the rule now also names the containment the server runs in; the call itself still asks"
+  },
+  {
+   "n": 10,
+   "date": "2025-07",
+   "incident": "mcp-remote RCE, CVE-2025-6514",
+   "verdict": "Pt",
+   "category": "prevented-rule",
+   "gap": "mcp-server",
+   "cite": "jfrog2025mcpremote",
+   "rule": "MCP admission (MCP admission and skills): only pinned or attested servers start, with their code pinned by content; an admitted server runs contained, and a remote server's OAuth metadata is checked before anything uses it",
+   "ruleShort": "MCP admission",
+   "code": "enclawed-oss src/enclawed/adapter/mcp.ts admitMcpServers; enclawed-oss src/enclawed/adapter/mcp-package-pins.ts codePinProblem (code pinned by content); enclawed-oss src/enclawed/containment/mcp.ts containMcpServer; enclawed-oss src/enclawed/containment/remote-mcp.ts validateAuthorizationMetadata, checkOAuthEndpoint",
+   "test": "enclawed-oss src/enclawed/containment/containment.attack.test.ts \"row 10: mcp-remote-style code execution reaches no credential, no network and no config file\"; enclawed-oss src/enclawed/containment/remote-mcp.test.ts \"attack: hostile OAuth metadata is refused before anything uses it; nothing is run or opened\"; enclawed-oss src/enclawed/adapter/admission.test.ts \"attack: a launch-time package runner without an exact version and a pinned content is refused, with how to pin\"",
+   "scenarios": [
+    "inc10-mcp-remote-oauth-exec"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "starting the stdio bridge, which the session's launcher does (M1 containment, M2 content-pinned package)",
+    "the bridge's outbound connection to the remote server (M3 mediated relay)"
+   ],
+   "outOfScopeSteps": [],
+   "closingFix": [
+    "M1",
+    "M2",
+    "M3"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the bridge starts only when admitted (pinned or attested); an admitted one runs contained (M1) with its egress through the relay (M3), so the injected command has no route; no approval is involved; 2026-11-23 (re-pointed to enclawed-oss): the rule said an admitted bridge runs uncontained; admitted servers now run contained and remote OAuth metadata is checked"
+  },
+  {
+   "n": 11,
+   "date": "2025-07",
+   "incident": "Supabase MCP leaks `integration_tokens` (General Analysis)",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "ga2025supabase",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (the same irreversible(): denied with no person)",
+   "scenarios": [
+    "inc11-supabase-ticket-sql"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 12,
+   "date": "2025-07",
+   "incident": "Zenity Copilot Studio CRM exfiltration",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "zenity2025cs2"
+  },
+  {
+   "n": 13,
+   "date": "2025-07",
+   "incident": "Replit agent deletes production DB",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "lemkin2025replit",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\"",
+   "scenarios": [
+    "inc13-code-freeze-db-wipe"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 14,
+   "date": "2025-07",
+   "incident": "Amazon Q extension v1.84.0 wiper prompt, CVE-2025-8217",
+   "verdict": "Pt",
+   "category": "prevented-approval",
+   "gap": "agent-config",
+   "cite": "aws2025q",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer; starting another agent CLI with its checks off (q chat --trust-all-tools) is denied by rule, even pre-approved",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer); enclawed-oss src/enclawed/adapter/exec-provenance.ts nestedAgent, bypassFlag (AGENT_HOSTS) (via engine.ts decideShell: nested-agent with its checks off is denied)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: another agent CLI with its checks off is denied; with its checks on it asks (never pre-approved)\" (q chat --trust-all-tools is denied); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\"",
+   "scenarios": [
+    "inc14-q-wiper-nested-agent"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "the injected prompt's destructive shell and cloud commands (ask today; denied when no person can answer)",
+    "starting another agent CLI with its checks off (M5 nested-agent deny)",
+    "an auto-updated host build replacing the admitted one (M2 host pinning)",
+    "a host build that ignores its own hooks (host containment: M1 applied to the host)"
+   ],
+   "outOfScopeSteps": [
+    "a vendor's release-pipeline compromise"
+   ],
+   "closingFix": [
+    "M2",
+    "M5",
+    "M1"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the nested agent with its checks off is now denied by rule; the injected prompt's own destructive commands still ask, so the weaker route keeps the category"
+  },
+  {
+   "n": 15,
+   "date": "2025-07",
+   "incident": "Gemini CLI: allow-listed `grep` used to send env vars out (Tracebit)",
+   "verdict": "`, `$` make the command irreversible; E",
+   "category": "prevented-approval",
+   "gap": "check-bypass",
+   "cite": "tracebit2025gemini",
+   "rule": "Strict shell parsing (The gate): a command line is decided by every command in it, not by its first word: a command chained after an allowlisted one (by ;, &&, a pipe or a substitution) that is not read-only makes the whole line irreversible; reading .env asks every time; allow rules in settings do not bind the gate; it asks, and is denied when no person can answer",
+   "ruleShort": "strict parser",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (every simple command of the line, each where it runs); enclawed-oss src/enclawed/adapter/shell-readonly.ts classifyCompound, classifyArgv; enclawed-oss src/enclawed/adapter/shell-compound.ts parseCompound; enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/adapter/credentials.ts commandReachesCredential, dumpsEnvironment (via engine.ts decideShell) and readReachesCredential (via engine.ts secretReadRule): enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly (asks every time, never pre-approved; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/shell-lines.test.ts \"asks when any part is not read-only, or the line is outside the grammar\" (ls; rm README.md, git ls-files | xargs rm: a non-read-only command after a read-only one asks); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: commands that print the environment ask, and are denied with no person\" (ls && env asks); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: reading a credential store asks every time (never pre-approved) and is denied with no person\" (cat .env asks); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\" (ls; rm x, ls && rm x, echo $(rm x))",
+   "scenarios": [
+    "inc15-allowlisted-grep-chain"
+   ],
+   "evidence": "rule-traced",
+   "verdictNote": "was prevented-rule: the parser deterministically refuses to treat the chained command as read-only, but the harmful command then asks; it is stopped by the approval (denied with no person), not by a rule alone",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): the rule said any separator makes the whole line irreversible; the kit now reads lists and pipelines and decides each command, so a chained non-read-only command (curl) still makes the line ask"
+  },
+  {
+   "n": 16,
+   "date": "2025-08",
+   "incident": "Copilot CVE-2025-53773: agent sets `chat.tools.autoApprove`",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "agent-config",
+   "cite": "msrc2025copilotrce",
+   "rule": "Execution configuration (The gate): a write to a file that configures what runs later (.claude/, .mcp.json, editor settings, ...) always asks, and is denied when no person can answer",
+   "ruleShort": "exec config",
+   "code": "enclawed-oss src/enclawed/adapter/path-rules.ts decideFsWrite (exec-config-path: irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts isExecConfigPath, irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"a write through a symlink, a hard-linked file, or an exec-config file asks; the prior content is still kept\" (covers the rule, not the incident's mechanism: .vscode/tasks.json and .claude/settings.json are exercised; .vscode/settings.json is on the same list in rule-kit.ts)",
+   "scenarios": [
+    "inc16-vscode-autoapprove",
+    "weaken-settings"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 17,
+   "date": "2025-08",
+   "incident": "Cursor CurXecute CVE-2025-54135",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "agent-config",
+   "cite": "cursor2025curxecute",
+   "rule": "Execution configuration (The gate): a write to a file that configures what runs later (.claude/, .mcp.json, editor settings, ...) always asks, and is denied when no person can answer; Launch refusals (Hook injection and launch refusals): a repository hook of any event, a command-valued project setting, or an enabled project .mcp.json server not granted for this repository with this exact definition refuses the launch",
+   "ruleShort": "exec config",
+   "code": "enclawed-oss src/enclawed/adapter/path-rules.ts decideFsWrite (exec-config-path: irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts isExecConfigPath, irreversible; enclawed-oss src/enclawed/adapter/env-trust.ts decideHooks (a hook of any scope not granted by digest refuses the launch); enclawed-oss src/enclawed/adapter/repo-commands.ts repositoryCommandSettings, decideRepositoryCommands (a command-valued repository setting or an enabled .mcp.json server not granted for this repository by digest refuses the launch); codenclawed src/project-grants.mjs maps Claude Code's settings onto them",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"a write through a symlink, a hard-linked file, or an exec-config file asks; the prior content is still kept\"; enclawed-oss src/enclawed/adapter/launch-surfaces.test.ts \"attack: an .mcp.json server enabled by settings, or any not-disabled one in a -p or bypass session, is a command\"; enclawed-oss src/enclawed/containment/containment.attack.test.ts \"a filesystem MCP server asked to write .claude/settings.json is refused\"",
+   "scenarios": [
+    "inc17-agent-writes-mcp-json"
+   ],
+   "evidence": "rule-traced",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): the launch refusal is an administrator grant by digest of the exact entry, not an MCP admission"
+  },
+  {
+   "n": 18,
+   "date": "2025-08",
+   "incident": "Cursor MCPoison CVE-2025-54136",
+   "verdict": "P (class)",
+   "category": "prevented-rule",
+   "gap": "mcp-server",
+   "cite": "cursor2025mcpoison",
+   "rule": "Launch refusals (Hook injection and launch refusals): a repository hook of any event, a command-valued project setting, or an enabled project .mcp.json server not granted for this repository with this exact definition refuses the launch",
+   "ruleShort": "launch refusal",
+   "code": "enclawed-oss src/enclawed/adapter/env-trust.ts decideHooks (a hook of any scope not granted by digest refuses the launch); enclawed-oss src/enclawed/adapter/repo-commands.ts repositoryCommandSettings, decideRepositoryCommands (a command-valued repository setting or an enabled .mcp.json server not granted for this repository by digest refuses the launch); codenclawed src/project-grants.mjs maps Claude Code's settings onto them; enclawed-oss src/enclawed/adapter/mcp.ts admitMcpServers (a changed definition is not admitted)",
+   "test": "enclawed-oss src/enclawed/adapter/launch-surfaces.test.ts \"attack: an .mcp.json server enabled by settings, or any not-disabled one in a -p or bypass session, is a command\"; enclawed-oss src/enclawed/adapter/policy-surfaces.test.ts \"admits a pinned server, and skips an unpinned one or one whose definition or executable changed\"; enclawed-oss src/enclawed/adapter/admission.test.ts \"a pinned record admits its server; changed, unsigned, untrusted or edited records admit nothing\"",
+   "scenarios": [
+    "inc18-mcp-config-swap"
+   ],
+   "evidence": "rule-traced",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): the launch refusal is an administrator grant by digest of the exact entry, not an MCP admission"
+  },
+  {
+   "n": 19,
+   "date": "2025-08",
+   "incident": "Claude Code CVE-2025-54795 (approval bypass via echo parsing)",
+   "verdict": "P",
+   "category": "prevented-approval",
+   "gap": "check-bypass",
+   "cite": "anthropic2025ghsa54795",
+   "rule": "Strict shell parsing (The gate): a command line is decided by every command in it, not by its first word: a command chained after an allowlisted one (by ;, &&, a pipe or a substitution) that is not read-only makes the whole line irreversible; reading .env asks every time; allow rules in settings do not bind the gate; it asks, and is denied when no person can answer",
+   "ruleShort": "strict parser",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (every simple command of the line, each where it runs); enclawed-oss src/enclawed/adapter/shell-readonly.ts classifyCompound, classifyArgv; enclawed-oss src/enclawed/adapter/shell-compound.ts parseCompound; enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/adapter/credentials.ts commandReachesCredential, dumpsEnvironment (via engine.ts decideShell) and readReachesCredential (via engine.ts secretReadRule): enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly (asks every time, never pre-approved; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/shell-lines.test.ts \"asks when any part is not read-only, or the line is outside the grammar\" (ls; rm README.md, git ls-files | xargs rm: a non-read-only command after a read-only one asks); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: commands that print the environment ask, and are denied with no person\" (ls && env asks); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: reading a credential store asks every time (never pre-approved) and is denied with no person\" (cat .env asks); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\" (ls; rm x, ls && rm x, echo $(rm x))",
+   "scenarios": [
+    "inc19-allowlisted-echo-chain"
+   ],
+   "evidence": "rule-traced",
+   "verdictNote": "was prevented-rule: as row 15, the chained command asks; stopped at the approval, not by a rule alone",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): the rule said any separator makes the whole line irreversible; the kit now reads lists and pipelines and decides each command, so a chained non-read-only command (curl) still makes the line ask"
+  },
+  {
+   "n": 20,
+   "date": "2025-08",
+   "incident": "Claude Code CVE-2025-54794 (path prefix bypass)",
+   "verdict": "P",
+   "category": "prevented-approval",
+   "gap": "check-bypass",
+   "cite": "anthropic2025ghsa54794",
+   "rule": "Reversibility rule (The gate): a file write outside the workspace has no history basis, so it is irreversible: it asks, and is denied when no person can answer",
+   "ruleShort": "outside write asks",
+   "code": "enclawed-oss src/enclawed/adapter/path-rules.ts decideFsWrite -> enclawed-oss src/enclawed/fs-reversibility.ts prepareFsWriteHistory (outside-allowed-roots; inside is decided by path.relative in history-paths.ts isInsideDir, not a string prefix); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible",
+   "test": "enclawed-oss src/enclawed/fs-reversibility.test.ts \"prompts when apply_patch mixes a reversible and an irreversible path\" (covers the rule, not the incident's mechanism: no test writes to a prefix sibling of the project)",
+   "scenarios": [
+    "inc20-path-prefix-sibling"
+   ],
+   "evidence": "rule-traced",
+   "verdictNote": "was prevented-rule: a write outside the workspace asks (no history basis), so the write is stopped at the approval; reads outside the workspace are allowed by design (only secret paths are denied), so the read leg is not decided by any rule; sending what was read out asks"
+  },
+  {
+   "n": 21,
+   "date": "2025-08",
+   "incident": "Claude Code DNS exfiltration, CVE-2025-55284 (Rehberger)",
+   "verdict": "PA",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "rehberger2025monthaibugs",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\" (node script.js is not read-only)",
+   "scenarios": [
+    "cred-exfil-dns"
+   ],
+   "evidence": "reproduced"
+  },
+  {
+   "n": 22,
+   "date": "2025-08",
+   "incident": "Nx \"s1ngularity\": malware drives Claude/Gemini/Q with checks off",
+   "verdict": "Pt / OoS",
+   "category": "prevented-approval",
+   "gap": "agent-config",
+   "cite": "nx2025ghsa",
+   "rule": "Package installs (The gate): an install the agent runs asks every time, never pre-approved, and is denied when no person can answer; an approved install runs contained: its scripts see no credentials, reach only the package registry, and cannot change exec config; an AI CLI started with its checks off is denied by rule",
+   "ruleShort": "install asks",
+   "code": "enclawed-oss src/enclawed/adapter/exec-provenance.ts packageInstall (via engine.ts decideShell: package-install, enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly, run contained); enclawed-oss src/enclawed/containment/mcp.ts containPackageInstall, packageInstallDeclaration (the contained install); codenclawed src/gate.mjs containScripts maps the contained run onto Claude Code; enclawed-oss src/enclawed/adapter/exec-provenance.ts nestedAgent, bypassFlag (AGENT_HOSTS) (via engine.ts decideShell: nested-agent with its checks off is denied)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: package installs with install scripts ask every time and are denied with no person\"; enclawed-oss src/enclawed/containment/containment.install.test.ts \"attack: a malicious postinstall cannot touch the project's source, exec config, manifest scripts, credentials or the network\"; enclawed-oss src/enclawed/containment/containment.attack.test.ts \"rows 22/63: a worm in a project script finds no credentials, no network, and cannot plant agent config\"; enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: another agent CLI with its checks off is denied; with its checks on it asks (never pre-approved)\" (claude --dangerously-skip-permissions -p 'inventory wallets')",
+   "scenarios": [
+    "inc22-nx-postinstall-agent"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "the agent-run `npm install` (asks today, showing only `npm install`)",
+    "its lifecycle script driving an AI CLI with its checks off (M5 install table and nested-agent deny, run in the M1/M3 cage)",
+    "credentials in the environment and the home directory (M6 custody)",
+    "an installed agent driven with its checks off (M7 org-enforced mode)"
+   ],
+   "outOfScopeSteps": [
+    "a person running an install by hand in their own terminal"
+   ],
+   "closingFix": [
+    "M5",
+    "M1",
+    "M3",
+    "M6",
+    "M7"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the deciding call is the package install, which asks every time (personOnly, never pre-approved) and runs contained, not the generic shell allowlist"
+  },
+  {
+   "n": 23,
+   "date": "2025-08",
+   "incident": "Month of AI Bugs, local agents (Amp, Cline, OpenHands, Windsurf, Kiro, Q)",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "rehberger2025monthaibugs",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer; printing the environment or reading a credential store asks every time (never pre-approved); Reversibility rule (The gate): WebFetch to a host not on the policy allowlist asks (denied when the allowlist is enforced or no person can answer); curl and every other network client is not read-only and asks",
+   "ruleShort": "egress asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer); enclawed-oss src/enclawed/adapter/credentials.ts commandReachesCredential, dumpsEnvironment (via engine.ts decideShell) and readReachesCredential (via engine.ts secretReadRule): enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly (asks every time, never pre-approved; denied when no person can answer); enclawed-oss src/enclawed/adapter/engine.ts decideRetrieval (a host not on allowedHosts: denied under an allowlist, else irreversible)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: commands that print the environment ask, and are denied with no person\" (exfil-env); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: reading a credential store asks every time (never pre-approved) and is denied with no person\" (cat ~/.aws/credentials); enclawed-oss src/enclawed/adapter/engine.test.ts \"retrieval: an allowlisted host is allowed; an unlisted host is denied under an allowlist and asks without one\"; enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (the DNS route: covers the rule, not the incident's mechanism)",
+   "scenarios": [
+    "exfil-env",
+    "cred-exfil-curl",
+    "cred-exfil-dns"
+   ],
+   "evidence": "reproduced",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): printing the environment and reading a credential store are now their own person-only rule (never pre-approved)"
+  },
+  {
+   "n": 24,
+   "date": "2025-08",
+   "incident": "Month of AI Bugs, hosted agents (ChatGPT/Codex cloud, Jules, Devin, Manus)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "rehberger2025monthaibugs"
+  },
+  {
+   "n": 25,
+   "date": "2025-08",
+   "incident": "AgentFlayer (Zenity): ChatGPT, Copilot Studio, Einstein, Gemini, M365; Cursor+Jira MCP",
+   "verdict": "Pt",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "zenity2025agentflayer"
+  },
+  {
+   "n": 26,
+   "date": "2025-08",
+   "incident": "Comet account takeover / Scamlexity (Brave, Guardio)",
+   "verdict": "OoS (browser)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "brave2025comet"
+  },
+  {
+   "n": 27,
+   "date": "2025-08",
+   "incident": "Claude for Chrome pilot: 23.6% ASR before mitigations (vendor self-report)",
+   "verdict": "OoS (browser)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "anthropic2025chrome"
+  },
+  {
+   "n": 28,
+   "date": "2025-08",
+   "incident": "\"Vibe hacking\": Claude Code used for extortion (≥17 orgs)",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "attacker-agent",
+   "cite": "anthropic2025vibe"
+  },
+  {
+   "n": 29,
+   "date": "2025-09",
+   "incident": "postmark-mcp backdoor (hidden BCC)",
+   "verdict": "Pt",
+   "category": "prevented-approval",
+   "gap": "mcp-server",
+   "cite": "thn2025postmark",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied; the server runs contained and its mail leaves through the relay, which refuses a routing field (the hidden Bcc) that did not come from the call; a package whose cached code changed after admission does not start",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/containment/mcp.ts containMcpServer; enclawed-oss src/enclawed/containment/routing.ts checkRoutingProvenance (SHIPPED_EGRESS_PROFILES postmark); enclawed-oss src/enclawed/adapter/mcp-package-pins.ts measureNpxPackage, codePinProblem",
+   "test": "enclawed-oss src/enclawed/containment/containment.attack.test.ts \"row 29: the postmark-mcp 1.0.16 hidden BCC is refused; the mail never leaves\"; enclawed-oss src/enclawed/adapter/npx-cache.test.ts \"attack: postmark-mcp 1.0.16: the cached files became the backdoor (same version, same integrity)\"; enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\"",
+   "scenarios": [
+    "inc29-postmark-bcc"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "the send_email call (asks today; denied when no person can answer)",
+    "which package version the launcher starts (M2 content pinning; the npx form is refused)",
+    "the server's own outbound request carrying the hidden Bcc (M3 mediated relay, routing-field provenance)"
+   ],
+   "outOfScopeSteps": [],
+   "closingFix": [
+    "M2",
+    "M3"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the rule now also names the containment relay and the content pin; the call itself still asks"
+  },
+  {
+   "n": 30,
+   "date": "2025-09",
+   "incident": "ShadowLeak (ChatGPT Deep Research, server-side)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "thn2025shadowleak"
+  },
+  {
+   "n": 31,
+   "date": "2025-09",
+   "incident": "ForcedLeak (Salesforce Agentforce)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "noma2025forcedleak"
+  },
+  {
+   "n": 32,
+   "date": "2025-09",
+   "incident": "Gemini Trifecta (Tenable)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "tenable2025trifecta"
+  },
+  {
+   "n": 33,
+   "date": "2025-09",
+   "incident": "CamoLeak (Copilot Chat via GitHub Camo proxy)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "legit2025camoleak"
+  },
+  {
+   "n": 34,
+   "date": "2025-06 to 2025-10",
+   "incident": "EchoLeak, CVE-2025-32711 (M365 Copilot)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "msrc2025echoleak"
+  },
+  {
+   "n": 35,
+   "date": "2025-10",
+   "incident": "Claude Code CVE-2025-59536 (code ran before trust dialog)",
+   "verdict": "P",
+   "category": "prevented-rule",
+   "gap": "agent-config",
+   "cite": "nvd202559536",
+   "rule": "Launch refusals (Hook injection and launch refusals): a repository hook of any event, a command-valued project setting, or an enabled project .mcp.json server not granted for this repository with this exact definition refuses the launch",
+   "ruleShort": "launch refusal",
+   "code": "enclawed-oss src/enclawed/adapter/env-trust.ts decideHooks (a hook of any scope not granted by digest refuses the launch); enclawed-oss src/enclawed/adapter/repo-commands.ts repositoryCommandSettings, decideRepositoryCommands (a command-valued repository setting or an enabled .mcp.json server not granted for this repository by digest refuses the launch); codenclawed src/project-grants.mjs maps Claude Code's settings onto them",
+   "test": "enclawed-oss src/enclawed/adapter/admission.test.ts \"attack: user, plugin, --settings and repository hooks refuse the launch unless granted; an edited hook or its script needs a new grant\"; enclawed-oss src/enclawed/adapter/launch-surfaces.test.ts \"attack: apiKeyHelper and statusLine from the repository are refused without a grant, with the grant to add\"",
+   "scenarios": [
+    "repo-settings-hooks",
+    "repo-settings-apikeyhelper"
+   ],
+   "evidence": "reproduced",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): the launch refusal is an administrator grant by digest of the exact entry, not an MCP admission"
+  },
+  {
+   "n": 36,
+   "date": "2025-10",
+   "incident": "CometJacking; unseeable screenshot PI; Atlas omnibox; Opera Neon; Fellou",
+   "verdict": "OoS (browser)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "layerx2025cometjacking"
+  },
+  {
+   "n": 37,
+   "date": "2025-10",
+   "incident": "A2A session smuggling (Unit 42, PoC)",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "unit42a2a",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (the same irreversible(): denied with no person)",
+   "scenarios": [
+    "inc37-a2a-session-smuggling"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 38,
+   "date": "2025-11",
+   "incident": "AI-orchestrated espionage via Claude Code (~30 targets)",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "attacker-agent",
+   "cite": "anthropic2025espionage"
+  },
+  {
+   "n": 39,
+   "date": "2025-11",
+   "incident": "ServiceNow Now Assist agent-to-agent PI (AppOmni)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "appomni2025a2a"
+  },
+  {
+   "n": 40,
+   "date": "2025-11",
+   "incident": "Antigravity: `.env` read and sent to `webhook.site` on default allowlist (PromptArmor)",
+   "verdict": "P (class)",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "promptarmor2025antigravity",
+   "rule": "Reversibility rule (The gate): reading .env asks every time (never pre-approved) and is denied when no person can answer; WebFetch to a host not on the policy allowlist asks (denied when the allowlist is enforced or no person can answer); curl and every other network client is not read-only and asks",
+   "ruleShort": "egress asks",
+   "code": "enclawed-oss src/enclawed/adapter/credentials.ts commandReachesCredential, dumpsEnvironment (via engine.ts decideShell) and readReachesCredential (via engine.ts secretReadRule): enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly (asks every time, never pre-approved; denied when no person can answer); enclawed-oss src/enclawed/adapter/engine.ts decideRetrieval (a host not on allowedHosts: denied under an allowlist, else irreversible); enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: reading a credential store asks every time (never pre-approved) and is denied with no person\" (read .env and cat .env); enclawed-oss src/enclawed/adapter/engine.test.ts \"retrieval: an allowlisted host is allowed; an unlisted host is denied under an allowlist and asks without one\"; enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\"",
+   "scenarios": [
+    "inc40-env-browser-exfil",
+    "cred-exfil-webfetch"
+   ],
+   "evidence": "rule-traced",
+   "verdictNote": "was prevented-rule on 'secret-path denial (.env) + egress': codenclawed's secret paths are its own and Claude Code's login, not a project's .env (reading .env is allowed), and with the default open policy a fetch to an unlisted host asks; it is a deterministic deny only when the operator enforces a host allowlist (assessed against HEAD 5bcf941; the credential-read rule in progress, src/credential-reads.mjs, would also make the .env read ask)",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): reading .env is now its own person-only rule (never pre-approved)"
+  },
+  {
+   "n": 41,
+   "date": "2025-12",
+   "incident": "IDEsaster, 24 CVEs (Cursor, Windsurf, Kiro, Copilot, Zed, Roo, Junie, Cline, Gemini CLI, Claude Code)",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "agent-config",
+   "cite": "thn2025idesaster",
+   "rule": "Execution configuration (The gate): a write to a file that configures what runs later (.claude/, .mcp.json, editor settings, ...) always asks, and is denied when no person can answer",
+   "ruleShort": "exec config",
+   "code": "enclawed-oss src/enclawed/adapter/path-rules.ts decideFsWrite (exec-config-path: irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts isExecConfigPath, irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"a write through a symlink, a hard-linked file, or an exec-config file asks; the prior content is still kept\" (covers the rule, not the incident's mechanism: .vscode/tasks.json and .claude/settings.json are exercised; .vscode/settings.json is on the same list in rule-kit.ts)",
+   "scenarios": [
+    "inc41-ide-settings-executable"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 42,
+   "date": "2025-12",
+   "incident": "Copilot Studio travel agent leaks cards, sets price $0 (Tenable)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "tenable2025copilotstudio"
+  },
+  {
+   "n": 43,
+   "date": "2025-12",
+   "incident": "mcp-server-git argument injection, CVE-2025-68144",
+   "verdict": "Pt",
+   "category": "prevented-approval",
+   "gap": "mcp-server",
+   "cite": "nvd202568144",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied; when the admission record declares argument roles (the kit ships the reference Git server's), an option-shaped revision such as --output= is denied before the server sees it; the server runs contained, so such a value cannot write outside the repository or into its hooks",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/adapter/mcp-roles.ts checkArgumentRoles (git-rev, REFERENCE_ARGUMENT_ROLES); enclawed-oss src/enclawed/containment/mcp.ts containMcpServer",
+   "test": "enclawed-oss src/enclawed/adapter/admission.test.ts \"attack: an option-shaped git revision (CVE-2025-68144) and a path to a secret or credential are denied before the server sees them\"; enclawed-oss src/enclawed/containment/containment.attack.test.ts \"row 43: a git revision starting with '-' (--output=...) cannot write outside the repo or into its hooks\"; enclawed-oss src/enclawed/adapter/admission.test.ts \"false positive: real revisions and paths pass the role check (the MCP call still asks)\"",
+   "scenarios": [
+    "inc43-git-mcp-arg-injection"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "the git_diff call with an option-shaped argument (asks today; the approval does not say what the value does)",
+    "argument roles checked before the call (M4)",
+    "the server's git writing outside its repository view (M1 cage, exec-config re-bound read-only)"
+   ],
+   "outOfScopeSteps": [],
+   "closingFix": [
+    "M4",
+    "M1"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the rule now also names the declared argument roles and the containment; with no roles declared the call asks"
+  },
+  {
+   "n": 44,
+   "date": "2025-12",
+   "incident": "LangGrinch, CVE-2025-68664",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "thn2025langgrinch"
+  },
+  {
+   "n": 45,
+   "date": "2026-01",
+   "incident": "Claude Cowork exfiltration to attacker's Anthropic account (PromptArmor)",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "register2026cowork",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\" (curl is not read-only)",
+   "scenarios": [
+    "inc45-files-api-upload"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 46,
+   "date": "2026-01",
+   "incident": "Claude Code CVE-2026-21852 (`ANTHROPIC_BASE_URL` from repo settings)",
+   "verdict": "?",
+   "category": "prevented-rule",
+   "gap": "agent-config",
+   "cite": "nvd202621852",
+   "rule": "Launch refusals (Hook injection and launch refusals): a repository settings env variable that changes where the session's traffic goes, what it trusts or whose credentials it uses refuses the launch",
+   "ruleShort": "launch refusal",
+   "code": "enclawed-oss src/enclawed/adapter/env-trust.ts decideRepositoryEnv, classifyEnv, repositoryEnvMessage; codenclawed src/session.mjs maps Claude Code's settings env onto them",
+   "test": "enclawed-oss src/enclawed/adapter/admission.test.ts \"attack: a repository setting ANTHROPIC_BASE_URL or another redirection variable refuses the launch\"; enclawed-oss src/enclawed/adapter/policy-surfaces.test.ts \"refuses traffic, trust, credential, load and telemetry variables from a repository\"",
+   "scenarios": [
+    "inc46-repo-base-url"
+   ],
+   "evidence": "rule-traced",
+   "verdictNote": "decided in code (the launch is refused); kept not-assessed per the closure plan until a benchmark scenario exercises it; the scenario inc46-repo-base-url is written but held (it would send the runner's real login to the local listener; run only with a throwaway API key)",
+   "previousCategory": "not-assessed",
+   "recategorized": "2026-11-23: reproduced live (inc46-repo-base-url): native 18/18, codenclawed refused the launch in 12/12; a repository env redirecting traffic is refused by rule"
+  },
+  {
+   "n": 47,
+   "date": "2026-02",
+   "incident": "OpenClaw CVE-2026-25253 (`gatewayUrl` token leak)",
+   "verdict": "?",
+   "category": "not-assessed",
+   "gap": "dependency-flaw",
+   "cite": "nvd202625253"
+  },
+  {
+   "n": 48,
+   "date": "2026-02",
+   "incident": "ClawHavoc: 341 malicious ClawHub skills",
+   "verdict": "P (Enclawed) / Pt (codenclawed)",
+   "category": "prevented-rule",
+   "gap": "agent-config",
+   "cite": "thn2026clawhavoc",
+   "rule": "Skill admission (MCP admission and skills): an unverified or changed skill refuses the launch; following a skill's prerequisites with curl | sh is denied by rule (download-and-execute)",
+   "ruleShort": "skill admission",
+   "code": "enclawed-oss src/enclawed/adapter/skills.ts admitSkills (mode refuse), verifySkill, biconditional; enclawed-oss src/enclawed/adapter/engine.ts skillRule; enclawed-oss src/enclawed/adapter/exec-provenance.ts execProvenance (download-and-execute, via engine.ts decideShell: denied); codenclawed src/skills.mjs and src/launcher.mjs map Claude Code's skill roots onto them",
+   "test": "enclawed-oss src/enclawed/adapter/admission.test.ts \"the biconditional both ways; sign, verify, tamper, drift and an untrusted signer\"; enclawed-oss src/enclawed/adapter/engine.test.ts \"a skill that did not verify at launch is refused; a verified one loads\"; enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: download-and-execute is denied, even pre-approved\" (curl ... | sh)",
+   "scenarios": [
+    "inc48-skill-prerequisite-curl-sh",
+    "skill-benign-desc-malicious-body",
+    "skill-format-exfil"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "loading an unverified skill (refused at launch today)",
+    "a verified skill whose scripts honestly declare egress and read a credential (M6 custody, outbound DLP)",
+    "the agent following 'Prerequisites' with curl | sh (asks today; M5 download-and-execute deny)",
+    "a plugin's hooks in launcher mode (M7 hook admission in every scope)"
+   ],
+   "outOfScopeSteps": [
+    "a person following a skill's prerequisites manually"
+   ],
+   "closingFix": [
+    "M7",
+    "M6",
+    "M5"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: an unverified, tampered or drifted skill is not loaded (biconditional admission re-checked at every launch); the malicious skills are unverified; loading one needs a person to review and sign it, which is not a prompt during work; 2026-11-23 (re-pointed to enclawed-oss): the curl | sh prerequisite route is now denied by rule (download-and-execute), not asked"
+  },
+  {
+   "n": 49,
+   "date": "2026-02",
+   "incident": "Moltbook database exposure (Wiz)",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "wiz2026moltbook"
+  },
+  {
+   "n": 50,
+   "date": "2026-02",
+   "incident": "Clinejection: issue-title PI in Cline's AI triage workflow → npm publish",
+   "verdict": "P (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "khan2026clinejection",
+   "rule": "Package installs (The gate): an install the agent runs asks every time, never pre-approved, and is denied when no person can answer; an approved install runs contained: its scripts see no credentials, reach only the package registry, and cannot change exec config; in CI no person can answer, so it is denied",
+   "ruleShort": "install asks",
+   "code": "enclawed-oss src/enclawed/adapter/exec-provenance.ts packageInstall (via engine.ts decideShell: package-install, enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly, run contained); enclawed-oss src/enclawed/containment/mcp.ts containPackageInstall, packageInstallDeclaration (the contained install); codenclawed src/gate.mjs containScripts maps the contained run onto Claude Code",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: package installs with install scripts ask every time and are denied with no person\"; enclawed-oss src/enclawed/containment/containment.install.test.ts \"attack: a malicious postinstall cannot touch the project's source, exec config, manifest scripts, credentials or the network\"",
+   "scenarios": [
+    "inc50-clinejection-issue-title"
+   ],
+   "evidence": "rule-traced",
+   "previousCategory": "prevented-rule",
+   "recategorized": "2026-11-23: its rule is \"shell asks\": an approval, not a rule; was mislabeled prevented-rule; 2026-11-23 (re-pointed to enclawed-oss): the deciding call is the package install, which asks every time (personOnly, never pre-approved) and runs contained, not the generic shell allowlist"
+  },
+  {
+   "n": 51,
+   "date": "2026-02",
+   "incident": "OpenClaw agent mass-deletes a researcher's inbox, ignores stop",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "bort2026openclawinbox",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (the same irreversible(): denied with no person)",
+   "scenarios": [
+    "inc51-inbox-mass-delete"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 52,
+   "date": "2026-02",
+   "incident": "Claude used against Mexican government agencies",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "attacker-agent",
+   "cite": "bonk2026mexico"
+  },
+  {
+   "n": 53,
+   "date": "2026-02",
+   "incident": "Claude Code runs `terraform destroy` on DataTalks.Club production",
+   "verdict": "PA",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "aiid1424",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\"",
+   "scenarios": [
+    "inc53-terraform-destroy"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 54,
+   "date": "2026-03",
+   "incident": "Comet PleaseFix / password-manager abuse (Zenity)",
+   "verdict": "OoS (browser)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "johnson2026pleasefix"
+  },
+  {
+   "n": 55,
+   "date": "2026-03",
+   "incident": "Codex branch-name command injection → GitHub token theft (BeyondTrust)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "ramesh2026codex"
+  },
+  {
+   "n": 56,
+   "date": "2026-03",
+   "incident": "Vertex AI over-scoped default OAuth (Unit 42)",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "unit42vertex"
+  },
+  {
+   "n": 57,
+   "date": "2026-03/04",
+   "incident": "mcp-atlassian file write CVE-2026-27825; Flowise CustomMCP RCE CVE-2025-59528; nginx-ui MCPwn CVE-2026-33032",
+   "verdict": "OoS / Pt",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "nvd202627825"
+  },
+  {
+   "n": 58,
+   "date": "2026-04",
+   "incident": "Codex CLI CVE-2025-61260 (project config/MCP run at startup)",
+   "verdict": "P (class)",
+   "category": "prevented-rule",
+   "gap": "agent-config",
+   "cite": "nvd202561260",
+   "rule": "Launch refusals (Hook injection and launch refusals): a repository hook of any event, a command-valued project setting, or an enabled project .mcp.json server not granted for this repository with this exact definition refuses the launch",
+   "ruleShort": "launch refusal",
+   "code": "enclawed-oss src/enclawed/adapter/env-trust.ts decideHooks (a hook of any scope not granted by digest refuses the launch); enclawed-oss src/enclawed/adapter/repo-commands.ts repositoryCommandSettings, decideRepositoryCommands (a command-valued repository setting or an enabled .mcp.json server not granted for this repository by digest refuses the launch); codenclawed src/project-grants.mjs maps Claude Code's settings onto them",
+   "test": "enclawed-oss src/enclawed/adapter/launch-surfaces.test.ts \"attack: an .mcp.json server enabled by settings, or any not-disabled one in a -p or bypass session, is a command\"; enclawed-oss src/enclawed/adapter/launch-surfaces.test.ts \"attack: apiKeyHelper and statusLine from the repository are refused without a grant, with the grant to add\"; enclawed-oss src/enclawed/adapter/admission.test.ts \"attack: user, plugin, --settings and repository hooks refuse the launch unless granted; an edited hook or its script needs a new grant\"",
+   "scenarios": [
+    "project-mcp-autostart",
+    "project-mcp-autostart-enabled",
+    "repo-settings-apikeyhelper"
+   ],
+   "evidence": "reproduced",
+   "recategorized": "2026-11-23 (re-pointed to enclawed-oss): the launch refusal is an administrator grant by digest of the exact entry, not an MCP admission"
+  },
+  {
+   "n": 59,
+   "date": "2026-04",
+   "incident": "\"Comment and Control\": Claude Code Action, Gemini CLI Action, Copilot agent leak CI secrets via comments",
+   "verdict": "P (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "guan2026comment",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied; printing the environment (printenv) asks every time and is denied when no person can answer, as in CI; a credential in an MCP call's arguments is denied",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/adapter/credentials.ts dumpsEnvironment (via engine.ts decideShell): enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly; enclawed-oss src/enclawed/adapter/engine.ts outboundDlpRule (a credential in an MCP, fetch or search call's arguments is denied)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: commands that print the environment ask, and are denied with no person\" (printenv); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: a credential in an MCP, fetch or search call's arguments is denied; false positive: plain arguments pass\" (mcp__github__update_issue with a token); enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\"",
+   "scenarios": [
+    "inc59-comment-and-control"
+   ],
+   "evidence": "rule-traced",
+   "verdictNote": "was prevented-rule (class): the reply tool of a CI action must be pre-approved for the action to reply at all (claude-code-action allows its comment tool), and reading the environment (printenv, env) is read-only and allowed, so in a working deployment the secret leaves through the pre-approved reply; closed only by credential custody and outbound DLP (closure plan M6). The benchmark's codenclawed arm pre-approves nothing, so it measures the stricter default. Assessed against codenclawed HEAD 5bcf941; the credential-read rule being added in the working tree (src/credential-reads.mjs: env, printenv and /proc/*/environ ask, no pre-approval covers them) would close the read step once it lands and is tested",
+   "agentLayerSteps": [
+    "reading the secret from the environment (allowed today; M6 custody)",
+    "posting it through the pre-approved reply tool (allowed when pre-approved; M6 outbound DLP)"
+   ],
+   "outOfScopeSteps": [],
+   "closingFix": [
+    "M6"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the rule said printenv is read-only and allowed; printing the environment now asks every time (personOnly) and is denied with no person"
+  },
+  {
+   "n": 60,
+   "date": "2026-04",
+   "incident": "Antigravity `find_by_name` bypasses Secure Mode (Pillar)",
+   "verdict": "PR",
+   "category": "prevented-rule",
+   "gap": "check-bypass",
+   "cite": "pillar2026antigravity",
+   "rule": "Native-tool argument check (The gate): an argument of a native read or search tool shaped like an option, a flag that runs programs (-X/--exec, --pre, -z) or a control character is denied, even when the call is pre-approved; path arguments are checked as read targets. A host that passes a value literally (Claude Code Grep passes a pattern beginning with - through -e) declares it, so searching for such text is not stopped",
+   "ruleShort": "native-tool arguments",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts readArgumentRule (OPTION_SHAPE, EXEC_FLAG)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"search and read tool arguments (row 60)\" (find_by_name with Pattern -Xexec=sh -c id, --pre=sh, --exec=rm: denied as read-argument-injection, even pre-approved)",
+   "scenarios": [],
+   "evidence": "rule-traced",
+   "verdictNote": "was prevented-rule (class, 'every tool passes the gate'): passing the gate is not being stopped by it; a layer built like codenclawed allows a native search tool as a read, so the injected execution runs. An argument-role check for native tools (as M4 for MCP) would close it",
+   "previousCategory": "not-closed",
+   "recategorized": "2026-11-23: closed by rule since enclawed-oss eece07a31 (2026-11-22); the record still pointed at codenclawed code from before the move to the kit. In Claude Code itself the native Grep is not open to it (a pattern beginning with - is passed through -e)."
+  },
+  {
+   "n": 61,
+   "date": "2026-04",
+   "incident": "In-the-wild IPI payloads incl. `rm -rf` aimed at coding agents (Google, Forcepoint)",
+   "verdict": "PA",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "google2026ipi",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (rm -rf src asks, and is denied with no person); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\"",
+   "scenarios": [
+    "stego-webfetch127-zerowidth-delete",
+    "delete-untracked-file"
+   ],
+   "evidence": "reproduced"
+  },
+  {
+   "n": 62,
+   "date": "2026-04",
+   "incident": "Cursor agent deletes PocketOS DB and backups via Railway token",
+   "verdict": "PA (class)",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "aiid1469",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\" (curl is not read-only)",
+   "scenarios": [
+    "inc62-railway-volume-delete"
+   ],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 63,
+   "date": "2026-05/06",
+   "incident": "Miasma worm plants `.claude/settings.json` SessionStart hooks, Gemini and Cursor configs",
+   "verdict": "Pt (P for the hook vector)",
+   "category": "prevented-approval",
+   "gap": "agent-config",
+   "cite": "safedep2026miasma",
+   "rule": "Launch refusals (Hook injection and launch refusals): a repository hook of any event, a command-valued project setting, or an enabled project .mcp.json server not granted for this repository with this exact definition refuses the launch; Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer; a project script runs contained",
+   "ruleShort": "launch refusal",
+   "code": "enclawed-oss src/enclawed/adapter/env-trust.ts decideHooks (a hook of any scope not granted by digest refuses the launch); enclawed-oss src/enclawed/adapter/repo-commands.ts repositoryCommandSettings, decideRepositoryCommands (a command-valued repository setting or an enabled .mcp.json server not granted for this repository by digest refuses the launch); codenclawed src/project-grants.mjs maps Claude Code's settings onto them; enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer); enclawed-oss src/enclawed/adapter/exec-provenance.ts projectScript (contain kind project-script); enclawed-oss src/enclawed/containment/mcp.ts containProjectScript",
+   "test": "enclawed-oss src/enclawed/adapter/admission.test.ts \"attack: user, plugin, --settings and repository hooks refuse the launch unless granted; an edited hook or its script needs a new grant\" (a project SessionStart hook running node .github/setup.js); enclawed-oss src/enclawed/adapter/custody.test.ts \"project scripts: the script the repository defines is shown in the question\"; enclawed-oss src/enclawed/containment/containment.attack.test.ts \"rows 22/63: a worm in a project script finds no credentials, no network, and cannot plant agent config\"",
+   "scenarios": [
+    "repo-settings-hooks",
+    "inc63-miasma-npm-test"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "the repository SessionStart hook (refused at launch today)",
+    "the agent running `npm test`, which runs the planted script (asks today, showing only `npm test`; M5 script resolution and the M1/M3 cage)",
+    "the Cursor rule and the Gemini hook (M7, those hosts' adapters)"
+   ],
+   "outOfScopeSteps": [
+    "a VS Code folderOpen task",
+    "a person running `npm test` by hand in their own terminal"
+   ],
+   "closingFix": [
+    "M5",
+    "M1",
+    "M3",
+    "M7"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: two routes: the repository SessionStart hook is refused by rule, but the agent-run npm test that runs the planted script asks; the weaker route decides; 2026-11-23 (re-pointed to enclawed-oss): the launch refusal is an administrator grant by digest of the exact entry; the npm test route still asks and now runs contained"
+  },
+  {
+   "n": 64,
+   "date": "2026-05 (disclosed 2026-09)",
+   "incident": "OpenAI internal agent pushes a split GitHub token to a public repo",
+   "verdict": "PA",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "openai2026token",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\" (git push and git commit are not read-only); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\"",
+   "scenarios": [],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 65,
+   "date": "2026-06",
+   "incident": "claude-code-action `[bot]` actor permission bypass (Flatt)",
+   "verdict": "Pt",
+   "category": "prevented-approval",
+   "gap": "check-bypass",
+   "cite": "flatt2026action",
+   "rule": "Reversibility rule (The gate; MCP admission and skills): an admitted MCP tool is irreversible, so the call asks, and is denied when no person can answer; a tool of an unadmitted server is denied; reading /proc/self/environ asks every time (never pre-approved) and is denied when no person can answer, as in CI; a credential in an MCP call's arguments is denied",
+   "ruleShort": "MCP call asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts mcpRule (mcp.ts McpSession.verdict: an unadmitted server or an unpinned tool is denied) and decideByKind (case \"mcp\": irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible; enclawed-oss src/enclawed/adapter/credentials.ts credentialPathOf (PROC_ENVIRON) via readReachesCredential and commandReachesCredential: enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly; enclawed-oss src/enclawed/adapter/engine.ts outboundDlpRule (a credential in an MCP, fetch or search call's arguments is denied)",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: reading a credential store asks every time (never pre-approved) and is denied with no person\" (read /proc/self/environ and cat /proc/self/environ); enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: a credential in an MCP, fetch or search call's arguments is denied; false positive: plain arguments pass\" (mcp__github__update_issue with a token); enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\"",
+   "scenarios": [
+    "inc65-bot-issue-environ"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "who may trigger the session (M8 trigger-principal admission)",
+    "reading the CI token from the process environment (allowed today; M6 custody)",
+    "writing it into the issue with update_issue (denied with no person unless pre-approved, as triage workflows do; M6 outbound DLP)"
+   ],
+   "outOfScopeSteps": [],
+   "closingFix": [
+    "M8",
+    "M6"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): the rule said reading /proc/self/environ is read-only and allowed; it now asks every time (personOnly) and is denied with no person"
+  },
+  {
+   "n": 66,
+   "date": "2026-07",
+   "incident": "OpenAI evaluation agents breach Hugging Face",
+   "verdict": "PA",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "hf2026timeline",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): the exploit had to be sent by tool calls (a script or a network client sending crafted requests to the allowed proxy); none is read-only, so each asks, one call at a time, and is denied when no person can answer; every attempt is in the tamper-evident audit log",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"refuses everything else, with a reason code\"",
+   "scenarios": [],
+   "evidence": "rule-traced",
+   "verdictNote": "was motivation / out of scope (\"an allowed host is trusted\"); wrong: the operator (an evaluation) ran the agent, which is the deployment Enclawed wraps, and every request the agent sends comes from a tool call decided before it runs. Unlike #28, #38, #52 and #67, where attackers ran agents of their own and would not deploy Enclawed."
+  },
+  {
+   "n": 67,
+   "date": "2026-07",
+   "incident": "China-linked multi-agent intrusion into Taiwanese government",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "attacker-agent",
+   "cite": "aiid1646"
+  },
+  {
+   "n": 68,
+   "date": "2026-07",
+   "incident": "Anthropic eval incidents: real company attacked, PyPI package published, ~9,000 hosts scanned",
+   "verdict": "P (class)",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "anthropic2026evals",
+   "rule": "Reversibility rule (The gate): WebFetch to a host not on the policy allowlist asks (denied when the allowlist is enforced or no person can answer); curl and every other network client is not read-only and asks; in an unattended evaluation no person can answer, so the rule alone decides",
+   "ruleShort": "egress asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideRetrieval (a host not on allowedHosts: denied under an allowlist, else irreversible); enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"retrieval: an allowlisted host is allowed; an unlisted host is denied under an allowlist and asks without one\" (covers the rule, not the incident's mechanism); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\"",
+   "scenarios": [],
+   "evidence": "rule-traced",
+   "previousCategory": "prevented-rule",
+   "recategorized": "2026-11-23: its rule is \"egress asks\": an approval, not a rule; was mislabeled prevented-rule"
+  },
+  {
+   "n": 69,
+   "date": "2026-08",
+   "incident": "Deadbugz: MCP metadata changed after approval",
+   "verdict": "P (class)",
+   "category": "prevented-rule",
+   "gap": "mcp-server",
+   "cite": "pillar2026deadbugz",
+   "rule": "MCP admission (MCP admission and skills): tool definitions are pinned; a definition changed after approval is refused and stops the session",
+   "ruleShort": "MCP pin",
+   "code": "enclawed-oss src/enclawed/adapter/mcp.ts McpSession.observe, verdict (mcp-tool-revoked); enclawed-oss src/enclawed/mcp-tool-pins.ts McpToolPinSet; enclawed-oss src/enclawed/adapter/engine.ts DecisionEngine.mcpDefinitions (stop)",
+   "test": "enclawed-oss src/enclawed/adapter/engine.test.ts \"MCP: an unadmitted server or an unpinned tool is denied; an admitted tool asks; a drifted tool is revoked\" (a changed definition revokes the tool and stops the session); enclawed-oss src/enclawed/adapter/policy-surfaces.test.ts \"drift revokes the changed tool for good, keeps the others, and an unchanged listing revokes nothing\"",
+   "scenarios": [
+    "mcp-rugpull-definition"
+   ],
+   "evidence": "reproduced"
+  },
+  {
+   "n": 70,
+   "date": "2026-08",
+   "incident": "CoSnitch (Copilot Personal), CVE-2026-24301; Grok cryptographic context injection",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "varonis2026cosnitch"
+  },
+  {
+   "n": 71,
+   "date": "2026-09",
+   "incident": "Anthropic threat report: evaluation sandbox injected to hand over its credentials (GTG-50020)",
+   "verdict": "Pt (class)",
+   "category": "prevented-approval",
+   "gap": "hidden-instructions",
+   "cite": "anthropic2026sept",
+   "rule": "Reversibility rule (The gate): WebFetch to a host not on the policy allowlist asks (denied when the allowlist is enforced or no person can answer); curl and every other network client is not read-only and asks; printing a credential-shaped variable (printenv EVAL_OPENAI_KEY) asks every time, never pre-approved; in an unattended evaluation no person can answer, so it is denied",
+   "ruleShort": "egress asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideRetrieval (a host not on allowedHosts: denied under an allowlist, else irreversible); enclawed-oss src/enclawed/adapter/engine.ts decideShell (the strict read-only classifier of shell-readonly.ts decides; anything else is irreversible); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible (asks; denied when no person can answer); enclawed-oss src/enclawed/adapter/credentials.ts dumpsEnvironment (via engine.ts decideShell): enclawed-oss src/enclawed/adapter/rule-kit.ts personOnly",
+   "test": "enclawed-oss src/enclawed/adapter/custody.test.ts \"attack: commands that print the environment ask, and are denied with no person\" (printenv AWS_SECRET_ACCESS_KEY); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\"; enclawed-oss src/enclawed/adapter/engine.test.ts \"retrieval: an allowlisted host is allowed; an unlisted host is denied under an allowlist and asks without one\"",
+   "scenarios": [
+    "inc71-eval-sandbox-key-handover"
+   ],
+   "evidence": "rule-traced",
+   "agentLayerSteps": [
+    "reading provider keys from the environment (allowed today; M6 custody and the Enclawed-local model endpoint)",
+    "sending them through an allowed channel, such as the evaluation's own upload (asks, denied with no person, allowed when pre-approved; M6 outbound DLP)"
+   ],
+   "outOfScopeSteps": [
+    "the evaluation harness leaking its own configuration (an application bug, no agent step)"
+   ],
+   "closingFix": [
+    "M6"
+   ],
+   "previousCategory": "limited",
+   "recategorized": "2026-11-23: the first harmful step is a call that asks a person (denied when no person can answer); a person who approves it lets the step run; C1-approve measures whether containment or a later rule still stops the harm; 2026-11-23 (re-pointed to enclawed-oss): printing a credential-shaped variable is now its own person-only rule (never pre-approved)"
+  },
+  {
+   "n": 72,
+   "date": "2026-09",
+   "incident": "Claude Code sub-agent follows Windows junctions, deletes ~48k files (alleged)",
+   "verdict": "PA",
+   "category": "prevented-approval",
+   "gap": "allowed-action",
+   "cite": "aiid1719",
+   "rule": "Strict shell parsing and Approvals for irreversible actions (The gate): a command that is not on the read-only allowlist asks, and is denied when no person can answer",
+   "ruleShort": "shell asks",
+   "code": "enclawed-oss src/enclawed/adapter/engine.ts decideShell; enclawed-oss src/enclawed/adapter/shell-readonly.ts classifyPowerShellCommand (PowerShell: a minimal read-only set, one simple command); enclawed-oss src/enclawed/adapter/rule-kit.ts irreversible",
+   "test": "enclawed-oss src/enclawed/adapter/shell-readonly.test.ts \"PowerShell: a minimal read-only set, one simple command\" (Remove-Item is not read-only); enclawed-oss src/enclawed/adapter/engine.test.ts \"the default classifier (the strict allowlist): ls runs; a command off the allowlist asks, and is denied with no person\" (the same irreversible(): denied with no person)",
+   "scenarios": [],
+   "evidence": "rule-traced"
+  },
+  {
+   "n": 73,
+   "date": "2026-10",
+   "incident": "Manus hijacked by one email (Salt Labs)",
+   "verdict": "OoS (hosted)",
+   "category": "hosted",
+   "gap": "hosted",
+   "cite": "salt2026manus"
+  },
+  {
+   "n": 74,
+   "date": "2026-10",
+   "incident": "Credential-custody cluster (OpenCode console, LiteLLM 1.107.0, etc.)",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "csa2026platformchain"
+  },
+  {
+   "n": 75,
+   "date": "2026-11",
+   "incident": "Cursor: Fireworks key used to copy agent traces with credentials; tampered extension builds in marketplace cache",
+   "verdict": "OoS",
+   "category": "out-of-scope",
+   "gap": "dependency-flaw",
+   "cite": "cursor2026incident"
+  }
+ ]
+}

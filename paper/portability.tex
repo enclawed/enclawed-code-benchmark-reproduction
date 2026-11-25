@@ -1,0 +1,65 @@
+% Portability section (\input by paper.tex). Every capability claim is from
+% the official documentation page cited next to it, accessed 2026-11-21.
+
+Nothing in \cz{}'s gate, cleaner, audit log or hardware root is specific
+to Claude Code: they take a tool name and a JSON input and return a
+decision, or take a tool result and return a cleaned one. What is
+specific is the \emph{encapsulation} of \cref{sec:inject,sec:session},
+and it rests on four capabilities of the host CLI. \textbf{R1}, a
+blocking pre-tool hook: an external program (or, at worst, an in-process
+plugin) that receives every tool call, in the main loop \emph{and in
+subagents}, before it runs, can deny it, and fails closed. \textbf{R2}, a
+post-tool output rewrite, which the cleaner needs. \textbf{R3}, a settings
+injection channel ranked above what a repository can supply, plus a way
+to see and refuse hooks and command-valued settings the project adds.
+\textbf{R4}, an on-disk transcript of every tool call with a stable call
+identifier, for the binding. R1 is necessary; R2 serves only the cleaner;
+R3 and R4 make the monitor \emph{reliable} against a hostile repository
+and hostile processes, and without them the corresponding attacks are
+detected later or not at all. \Cref{tab:portability} gives what each
+CLI's documentation says (``n.d.'': the cited page does not say;
+nothing is inferred from source code or third-party material).
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption{Agent CLIs against requirements R1--R4, from their official
+documentation (accessed 2026-11-21). Fail: what a failed or timed-out
+pre-tool hook does by default.}
+\label{tab:portability}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.13\linewidth}>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}p{0.12\linewidth}@{}}
+\toprule
+CLI & R1 pre-tool hook (fail; subagents) & R2 rewrite & R3 injection & R4 transcript \\
+\midrule
+Claude Code \cite{cc-hooks,cc-settings,cc-cli} & Yes (open; closed with \texttt{onFailure: "block"}; subagents yes) & Yes & Yes (\texttt{-{}-settings}) & Yes \\
+Codex CLI \cite{codex-hooks,codex-cli} & Yes, not hosted tools (open; n.d.) & Partial & Partial & Yes (unstable) \\
+Gemini CLI \cite{gemini-hooks,gemini-hooks-ref,gemini-config} & Yes (open; n.d.) & Yes & Partial & Yes \\
+Cursor \cite{cursor-hooks,cursor-cli} & Yes, in the agent (open unless \texttt{failClosed}; n.d.) & MCP only & Partial & Yes \\
+Copilot CLI \cite{copilot-hooks} & Yes (errors deny, timeouts open; implied) & Yes & Partial & Partial \\
+Kiro CLI \cite{kiro-hooks,kiro-hook-types,kiro-hook-actions} & Yes (non-zero exit blocks; n.d.) & n.d. & No & n.d. \\
+OpenCode \cite{opencode-plugins-v1,opencode-plugins-v2,opencode-config-v1} & In-process plugin (n.d.; a subagent bypass reported \cite{opencode-5894}) & Yes & Yes & n.d. \\
+Amp \cite{amp-plugin-api,amp-settings,amp-manual} & In-process plugin (n.d.; no subagent tools) & Yes & Partial & n.d. \\
+Cline \cite{cline-plugins} & In-process SDK plugin (errors ignored; n.d.) & Yes & Partial & n.d. \\
+Aider \cite{aider-options} & No & No & config file & Partial \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Hooks have become common: every CLI surveyed except Aider documents a
+pre-tool hook that can deny a call. The gaps are the ones that matter in
+Claude Code: most hooks fail \emph{open} by default, subagent coverage is
+stated explicitly only for Claude Code, and only Claude Code documents a
+command-line settings file ranked above project configuration, so in
+most others a launcher must find and refuse the hooks a repository adds.
+For a CLI that meets R1--R4 with external-program hooks (Codex CLI and
+Gemini CLI come closest), a port is an adapter: translate the CLI's hook
+input into \sys{}'s call shape and the decision back, generate its hook
+configuration in a private session directory, and parse its transcript
+for the binding; the session file, \texttt{env -i} start, control
+socket, peer check, handshake, gate, cleaner, audit log and hardware
+root carry over unchanged. Where a hook fails open, the launcher must
+make failure unlikely and rely on the transcript watch. For in-process
+plugins (OpenCode, Amp, Cline), a thin shim forwards each call to the
+external hook, and a project plugin loaded into the same process must be
+refused at launch. Only the Claude Code port has been built and
+measured; the other ports are design, not results.

@@ -1,0 +1,61 @@
+% Where Enclawed lives and how it wraps Claude Code (TikZ, \input by paper.tex).
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=2pt, align=center, font=\footnotesize, inner sep=5pt},
+  enc/.style={box, fill=blue!6},
+  cc/.style={box, fill=red!6},
+  dev/.style={box, fill=green!8, line width=0.8pt},
+  store/.style={draw, align=center, font=\scriptsize, inner sep=4pt, fill=gray!8},
+  arr/.style={-{Stealth[length=2mm]}, semithick},
+  lab/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  num/.style={circle, draw, fill=white, font=\scriptsize\bfseries, inner sep=0.5pt, minimum size=4mm},
+]
+  % --- Enclawed (left column)
+  \node[enc, text width=50mm, minimum height=11mm] (adapter) at (0,0)
+    {\textbf{\cz{} adapter}\\launcher \;$\cdot$\; hook};
+  \node[enc, text width=50mm, minimum height=24mm] (engine) at (0,-2.6)
+    {\textbf{\sys{} framework}\\decides every action:\\gate \;$\cdot$\; input cleaner\\MCP admission \;$\cdot$\; egress control\\audit};
+  \node[store, text width=22mm] (log) at (-1.4,-5.1) {tamper-evident\\audit log};
+  \node[store, text width=22mm] (snap) at (1.4,-5.1) {snapshots\\for undo};
+
+  % --- Claude Code (right column)
+  \node[cc, text width=40mm, minimum height=26mm] (claude) at (12.4,-2.6)
+    {\textbf{Claude Code CLI}\\(unmodified)\\[2pt]model loop \;$\cdot$\; tools\\MCP \;$\cdot$\; subagents};
+
+  % --- outside the boxes
+  \node[box, text width=24mm] (person) at (-7.2,0) {Person at\\the terminal};
+  \node[dev, text width=48mm] (device) at (0,-8.0)
+    {\textbf{\dev{}} (USB, optional)\\checks in on every call\\keeps the audit log's head};
+
+  \begin{scope}[on background layer]
+    \node[draw, rounded corners=4pt, fill=blue!2, line width=0.8pt,
+          fit=(adapter)(engine)(log)(snap), inner sep=8pt] (encl) {};
+    \node[font=\small\bfseries, anchor=south west] at (encl.north west) {\sys{} (outside the model)};
+    \node[draw, dashed, rounded corners=4pt, fill=red!2, fit=(claude), inner sep=8pt] (sess) {};
+    \node[font=\scriptsize, anchor=north west] at (sess.south west) {contained session};
+  \end{scope}
+
+  % --- (1) launch: from the adapter across and down into Claude Code
+  \draw[arr] (adapter.east) -- (claude.north |- adapter.east) -- (sess.north);
+  \node[num] at ($(adapter.east)+(0.45,0)$) {1};
+  \node[lab, above] at ($(adapter.east)!0.5!(claude.north |- adapter.east)$) {launches Claude Code with \sys{}'s hooks};
+
+  % --- (2)(3)(4) around every tool call: parallel horizontal arrows
+  \coordinate (eR) at (engine.east);
+  \coordinate (cL) at (sess.west);
+  \draw[arr] ($(cL)+(0,0.75)$) -- ($(eR)+(0,0.75)$);
+  \node[num] at ($(cL)+(-0.45,0.75)$) {2};
+  \node[lab, above] at ($($(eR)+(0,0.75)$)!0.5!($(cL)+(0,0.75)$)$) {proposed action (before it runs)};
+  \draw[arr] ($(eR)+(0,0)$) -- ($(cL)+(0,0)$);
+  \node[num] at ($(eR)+(0.45,0)$) {3};
+  \node[lab, above] at ($(eR)!0.5!(cL)$) {allow \,/\, ask a person \,/\, deny};
+  \draw[arr] ($(cL)+(0,-0.75)$) -- ($(eR)+(0,-0.75)$);
+  \node[num] at ($(cL)+(-0.45,-0.75)$) {4};
+  \node[lab, above] at ($($(eR)+(0,-0.75)$)!0.5!($(cL)+(0,-0.75)$)$) {result, cleaned (after it runs)};
+
+  % --- inside Enclawed, the person, the device
+  \draw[arr] (adapter) -- (engine);
+  \draw[arr] (log.north |- engine.south) -- (log.north);
+  \draw[arr] (snap.north |- engine.south) -- (snap.north);
+  \draw[arr, <->] (person) -- node[lab, below=3pt] {approves\\irreversible actions} (encl.west |- person);
+  \draw[arr, <->] (encl.south) -- node[lab, right=3pt] {per-call check,\\audit log head} (device.north);
+\end{tikzpicture}

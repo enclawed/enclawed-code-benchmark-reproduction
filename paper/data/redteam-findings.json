@@ -1,0 +1,536 @@
+{
+  "source": "test/redteam/gate/README*.md and test/redteam/integrity/README.md in codenclawed-cli; transcribed per finding, the attack and status columns are LaTeX",
+  "findings": [
+    {
+      "team": "gate",
+      "id": "F1",
+      "round": 1,
+      "severity": "crit.",
+      "attack": "\\texttt{git grep -Orm pat}: attached \\texttt{-O} value runs a program (deletes matched files)",
+      "status": "fixed",
+      "statusText": "fixed: getopt parsing, per-command option specs"
+    },
+    {
+      "team": "gate",
+      "id": "F2",
+      "round": 1,
+      "severity": "crit.",
+      "attack": "committed symlink to \\texttt{.git/config}; \\texttt{Write} through it skipped the exec-config check",
+      "status": "fixed",
+      "statusText": "fixed: check on resolved path; symlinked write asks"
+    },
+    {
+      "team": "gate",
+      "id": "F3",
+      "round": 1,
+      "severity": "high",
+      "attack": "\\texttt{.GIT/config} on case-insensitive filesystems",
+      "status": "fixed",
+      "statusText": "fixed: NFC + case-folded names; wider protected set"
+    },
+    {
+      "team": "gate",
+      "id": "F4",
+      "round": 1,
+      "severity": "med.",
+      "attack": "\\texttt{scratchpad\\_dir} covering the project suppressed snapshots",
+      "status": "fixed",
+      "statusText": "fixed: overlapping scratch ignored"
+    },
+    {
+      "team": "gate",
+      "id": "F5",
+      "round": 1,
+      "severity": "med.",
+      "attack": "\\texttt{WebFetch} to any host with secrets in the URL (open flavor)",
+      "status": "fixed",
+      "statusText": "fixed: unlisted host asks"
+    },
+    {
+      "team": "gate",
+      "id": "F6",
+      "round": 1,
+      "severity": "med.",
+      "attack": "allowlisted \\texttt{git log} runs repository \\texttt{core.pager} (TTY)",
+      "status": "fixed",
+      "statusText": "fixed: asks when repo config can start a program; residual: user/system git config trusted"
+    },
+    {
+      "team": "gate",
+      "id": "R1",
+      "round": 2,
+      "severity": "med.",
+      "attack": "\\texttt{git cat-file -{}-te}: 2-character abbreviation of \\texttt{-{}-textconv}",
+      "status": "fixed",
+      "statusText": "fixed: strict spec; refused-prefix rule"
+    },
+    {
+      "team": "gate",
+      "id": "R2",
+      "round": 2,
+      "severity": "med.",
+      "attack": "hard link in project to the audit log; \\texttt{Write} tampers the log",
+      "status": "fixed",
+      "statusText": "fixed: \\texttt{(dev,ino)} compare, deny; residual: TOCTOU"
+    },
+    {
+      "team": "gate",
+      "id": "R3",
+      "round": 2,
+      "severity": "low--med.",
+      "attack": "hard link to \\texttt{.git/config}",
+      "status": "fixed",
+      "statusText": "fixed: asks"
+    },
+    {
+      "team": "gate",
+      "id": "C1",
+      "round": 3,
+      "severity": "high",
+      "attack": "quadratic scan on unterminated \\texttt{<!-{}-}: minutes of CPU; a killed hook cleans nothing",
+      "status": "fixed",
+      "statusText": "fixed: linear scanner, budgets, withhold"
+    },
+    {
+      "team": "gate",
+      "id": "C2",
+      "round": 3,
+      "severity": "med.",
+      "attack": "ANSI conceal \\texttt{ESC[8;30m} not recognized",
+      "status": "fixed",
+      "statusText": "fixed: SGR parsed left to right"
+    },
+    {
+      "team": "gate",
+      "id": "C3",
+      "round": 3,
+      "severity": "low--med.",
+      "attack": "invisible \\texttt{U+2061-{}-2064}, \\texttt{U+180E}, Hangul fillers not stripped",
+      "status": "fixed",
+      "statusText": "fixed: full Default\\_Ignorable set"
+    },
+    {
+      "team": "gate",
+      "id": "D1",
+      "round": 4,
+      "severity": "crit.",
+      "attack": "tag character split by a stripped separator between its surrogate halves: cleaner reassembled the payload",
+      "status": "fixed",
+      "statusText": "fixed: code-point scan, fixed point, lone surrogates stripped"
+    },
+    {
+      "team": "gate",
+      "id": "D2",
+      "round": 4,
+      "severity": "med.",
+      "attack": "backspace/VT/FF overwrites hide \\texttt{rm -rf} from a human",
+      "status": "fixed",
+      "statusText": "fixed: rendered as a terminal does"
+    },
+    {
+      "team": "gate",
+      "id": "D3",
+      "round": 4,
+      "severity": "low--med.",
+      "attack": "text imitating \\sys{} notices inside tool output",
+      "status": "fixed",
+      "statusText": "fixed (superseded by out-of-band notices, E1)"
+    },
+    {
+      "team": "gate",
+      "id": "D4",
+      "round": 4,
+      "severity": "low",
+      "attack": "8-bit C1 controls not parsed",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "gate",
+      "id": "D5",
+      "round": 4,
+      "severity": "med.",
+      "attack": "call binding matched a decided path by string suffix/prefix",
+      "status": "fixed",
+      "statusText": "fixed: resolved paths, real boundary"
+    },
+    {
+      "team": "gate",
+      "id": "E2",
+      "round": 5,
+      "severity": "med.--high",
+      "attack": "newlines in an agent-controlled path wrote fake ``\\sys{}: SAFE'' lines into the approval text",
+      "status": "fixed",
+      "statusText": "fixed: quoted, labeled untrusted values; real path shown"
+    },
+    {
+      "team": "gate",
+      "id": "E1",
+      "round": 5,
+      "severity": "med.",
+      "attack": "notice imitations via look-alikes, mid-line, NBSP; leaked nonce",
+      "status": "fixed",
+      "statusText": "fixed: notices out of band; skeleton matching"
+    },
+    {
+      "team": "gate",
+      "id": "E3",
+      "round": 5,
+      "severity": "med.",
+      "attack": "32 nested-escape bytes withheld a whole 20\\,KB result",
+      "status": "fixed",
+      "statusText": "fixed: one-pass nesting; withhold only the region"
+    },
+    {
+      "team": "gate",
+      "id": "E4",
+      "round": 5,
+      "severity": "low--med.",
+      "attack": "legitimate joiners (Persian ZWNJ, emoji ZWJ) stripped",
+      "status": "fixed",
+      "statusText": "fixed: context-aware keep; residual: 1 bit per letter gap"
+    },
+    {
+      "team": "gate",
+      "id": "E5",
+      "round": 5,
+      "severity": "low--med.",
+      "attack": "attacker sentence framing a genuine notice",
+      "status": "fixed",
+      "statusText": "fixed: out of band; notice says what it covers"
+    },
+    {
+      "team": "integrity",
+      "id": "I1",
+      "round": 1,
+      "severity": "crit.",
+      "attack": "repo settings \\texttt{env} redirects policy and audit log (live)",
+      "status": "fixed",
+      "statusText": "fixed: session file, \\texttt{env -i}"
+    },
+    {
+      "team": "integrity",
+      "id": "I1b",
+      "round": 1,
+      "severity": "crit.",
+      "attack": "repo settings \\texttt{NODE\\_OPTIONS} preload replaces the gate (live)",
+      "status": "fixed",
+      "statusText": "fixed: \\texttt{env -i}; residual: native Windows has no \\texttt{env -i}"
+    },
+    {
+      "team": "integrity",
+      "id": "I1c",
+      "round": 1,
+      "severity": "high",
+      "attack": "repo settings switch a required hardware root off (live)",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "I2",
+      "round": 1,
+      "severity": "high",
+      "attack": "one invalid value in a user \\texttt{-{}-settings} drops all hooks (live)",
+      "status": "fixed",
+      "statusText": "fixed: schema validation, handshake"
+    },
+    {
+      "team": "integrity",
+      "id": "I3",
+      "round": 1,
+      "severity": "high",
+      "attack": "agent writes \\cz{}'s own policy, log, history",
+      "status": "fixed",
+      "statusText": "fixed: protected paths denied"
+    },
+    {
+      "team": "integrity",
+      "id": "I4",
+      "round": 1,
+      "severity": "high",
+      "attack": "agent rewrites the gate when installed in the project",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "I5",
+      "round": 1,
+      "severity": "med.",
+      "attack": "truncation healed by the next append",
+      "status": "fixed",
+      "statusText": "fixed: gap records"
+    },
+    {
+      "team": "integrity",
+      "id": "I6",
+      "round": 1,
+      "severity": "med.",
+      "attack": "deleted log reported as ``no log yet''",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "I7",
+      "round": 1,
+      "severity": "med.",
+      "attack": "whole log + head fabricated with the framework's logger",
+      "status": "residual-without-device",
+      "statusText": "residual without a device; detected with a \\dev{} (device)"
+    },
+    {
+      "team": "integrity",
+      "id": "I8",
+      "round": 1,
+      "severity": "high",
+      "attack": "environment-named fake hardware broker reports healthy",
+      "status": "fixed",
+      "statusText": "fixed: every answer checked against the genuine device"
+    },
+    {
+      "team": "integrity",
+      "id": "I9a",
+      "round": 1,
+      "severity": "high",
+      "attack": "repo \\texttt{PreToolUse} hook rewrites the input after \\sys{} allows (live)",
+      "status": "fixed",
+      "statusText": "fixed: launch refused; rewrite detected"
+    },
+    {
+      "team": "integrity",
+      "id": "I10",
+      "round": 1,
+      "severity": "med.",
+      "attack": "partial managed settings disable injection",
+      "status": "fixed",
+      "statusText": "fixed: structural check"
+    },
+    {
+      "team": "integrity",
+      "id": "I11",
+      "round": 1,
+      "severity": "med.",
+      "attack": "\\texttt{agents} subcommand launched without hooks",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "I12",
+      "round": 1,
+      "severity": "med.",
+      "attack": "planted history index entry makes restore write anywhere",
+      "status": "fixed",
+      "statusText": "fixed: entries from the audit log"
+    },
+    {
+      "team": "integrity",
+      "id": "I13",
+      "round": 1,
+      "severity": "low",
+      "attack": "restore keyed by content hash redirected",
+      "status": "fixed",
+      "statusText": "fixed: restore by entry id"
+    },
+    {
+      "team": "integrity",
+      "id": "I14",
+      "round": 1,
+      "severity": "low",
+      "attack": "generated settings file writable under a project \\texttt{TMPDIR}",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "R1",
+      "round": 1,
+      "severity": "low",
+      "attack": "lock directory spins the hook (DoS)",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "N1",
+      "round": 2,
+      "severity": "med.--high",
+      "attack": "invalid nested \\texttt{statusLine} drops the hooks (live)",
+      "status": "fixed",
+      "statusText": "fixed: nested validation, PreToolUse held"
+    },
+    {
+      "team": "integrity",
+      "id": "N2",
+      "round": 2,
+      "severity": "high",
+      "attack": "repo SessionStart hook forges the handshake record (live)",
+      "status": "fixed",
+      "statusText": "fixed: control socket, peer check, chained challenge"
+    },
+    {
+      "team": "integrity",
+      "id": "N3",
+      "round": 2,
+      "severity": "med.",
+      "attack": "repo hook disguised with \\texttt{\\# enclawde-hook} (live)",
+      "status": "fixed",
+      "statusText": "fixed: exact recognition, all sources"
+    },
+    {
+      "team": "integrity",
+      "id": "N4",
+      "round": 2,
+      "severity": "med.",
+      "attack": "piped stdout headless not treated as headless (live)",
+      "status": "fixed",
+      "statusText": "fixed"
+    },
+    {
+      "team": "integrity",
+      "id": "N5",
+      "round": 2,
+      "severity": "med.",
+      "attack": "reads of session file, auth state, Claude login allowed",
+      "status": "fixed",
+      "statusText": "fixed: secret paths for every read"
+    },
+    {
+      "team": "integrity",
+      "id": "N6",
+      "round": 2,
+      "severity": "low--med.",
+      "attack": "\\texttt{-{}-bg} exits 0 without a handshake",
+      "status": "fixed",
+      "statusText": "fixed; residual: no peer-checked handshake in background"
+    },
+    {
+      "team": "integrity",
+      "id": "N7",
+      "round": 2,
+      "severity": "med.",
+      "attack": "a child restores the erased login",
+      "status": "fixed",
+      "statusText": "fixed: tree/group kill, re-checks"
+    },
+    {
+      "team": "integrity",
+      "id": "N9",
+      "round": 3,
+      "severity": "high",
+      "attack": "dropped settings + repo hook runs the genuine hook on fabricated inputs (live)",
+      "status": "fixed",
+      "statusText": "fixed: schema validator, any repo hook refused, call binding"
+    },
+    {
+      "team": "integrity",
+      "id": "N10",
+      "round": 3,
+      "severity": "med.--high",
+      "attack": "any same-user process anchors a forged head (device)",
+      "status": "fixed",
+      "statusText": "fixed (device)"
+    },
+    {
+      "team": "integrity",
+      "id": "N10b",
+      "round": 3,
+      "severity": "med.",
+      "attack": "restored older anchor read as ``superseded''",
+      "status": "fixed",
+      "statusText": "fixed: fails verify; anchor history"
+    },
+    {
+      "team": "integrity",
+      "id": "N12",
+      "round": 3,
+      "severity": "med.",
+      "attack": "\\texttt{setsid} child survives the stop",
+      "status": "fixed",
+      "statusText": "fixed: systemd scope, session marker"
+    },
+    {
+      "team": "integrity",
+      "id": "N7b",
+      "round": 3,
+      "severity": "med.--low",
+      "attack": "double-forked helper restores login after re-checks",
+      "status": "mitigated",
+      "statusText": "mitigated: watcher; best effort"
+    },
+    {
+      "team": "integrity",
+      "id": "F1",
+      "round": 4,
+      "severity": "high",
+      "attack": "\\texttt{\\{\"\\$schema\": 5\\}} drops the hooks (live)",
+      "status": "fixed",
+      "statusText": "fixed: generated validator, stderr stop"
+    },
+    {
+      "team": "integrity",
+      "id": "F2",
+      "round": 4,
+      "severity": "med.--high",
+      "attack": "repo \\texttt{apiKeyHelper} runs repository code 8 times (live)",
+      "status": "fixed",
+      "statusText": "fixed: command-valued settings refused"
+    },
+    {
+      "team": "integrity",
+      "id": "N13",
+      "round": 4,
+      "severity": "high",
+      "attack": "forger runs genuine hook; \\texttt{ask} call still ran",
+      "status": "fixed",
+      "statusText": "fixed: decision reported, violation stops"
+    },
+    {
+      "team": "integrity",
+      "id": "N14",
+      "round": 4,
+      "severity": "high",
+      "attack": "log replaced mid-session laundered by the launcher's own anchoring (device)",
+      "status": "fixed",
+      "statusText": "fixed: chain follower (device)"
+    },
+    {
+      "team": "integrity",
+      "id": "N15",
+      "round": 4,
+      "severity": "med.",
+      "attack": "a same-user process occupying the device denies every launch (DoS)",
+      "status": "mitigated",
+      "statusText": "mitigated (device)"
+    },
+    {
+      "team": "integrity",
+      "id": "R5-A",
+      "round": 5,
+      "severity": "high",
+      "attack": "log replaced between sessions laundered by the next launch (device)",
+      "status": "fixed",
+      "statusText": "fixed: launch-time anchor gate, \\texttt{audit accept}"
+    },
+    {
+      "team": "integrity",
+      "id": "N13c",
+      "round": 5,
+      "severity": "med.",
+      "attack": "forged PostToolUse counted as interactive approval",
+      "status": "fixed",
+      "statusText": "fixed: approval at \\cz{}'s own prompt"
+    },
+    {
+      "team": "integrity",
+      "id": "R5-L",
+      "round": 5,
+      "severity": "low",
+      "attack": "\\texttt{recover-anchor} host gating is a convenience only",
+      "status": "documented",
+      "statusText": "documented; key-file permission checks"
+    }
+  ]
+}

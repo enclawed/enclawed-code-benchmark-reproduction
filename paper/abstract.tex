@@ -1,0 +1,31 @@
+% The abstract (\input by paper.tex). scripts/make-abstract.mjs turns it into abstract-arxiv.txt:
+% every macro substituted, plain ASCII, no math, at most 1500 characters.
+% It states H1-H4 supported; paper.tex stops the build when the generated verdicts disagree.
+% H5 is not named here while its live suite prints pending (no pending value may reach the abstract).
+\begin{abstract}\noindent
+Coding agents run commands, edit files and call tools on a
+developer's machine, steered by text anyone
+can plant in a repository, web page or tool result. This work aims to
+demonstrate that deterministic gating should always be the foundation of
+agent security: no one should lose data because a language model
+misread a request, let alone because an attacker steered it. \cz{}, an
+open-source launcher, runs the user's unmodified Claude Code inside
+\sys{}, where a fixed rule decides each tool call by
+its effect and reversibility before it runs. The paper tests the hypothesis that
+this rule stops every harmful call, puts every legitimate irreversible call to a person, stops no harmless
+one, and asks a person less often and more consistently than permissions
+keyed to command text. In \RunsNative{} live runs on
+\ModelsMeasured{} models, attacks took effect against native Claude Code
+in \NativeASRdefault{} of runs in default mode and \NativeASRbypass{} in
+bypassPermissions. On the same tasks, in every mode, \cz{} let
+\CzOneFNHarmful{} harmful calls run, ran \CzOneFNConsequential{}
+irreversible ones unapproved, stopped \CzOneFPHarmless{}
+harmless ones, needed a person \CzOneHitlFactorDefault{}
+times less often in default mode, and gave mixed decisions to
+\SameCzOneMixedShare{} of actions, against
+\SameNativeMixedShare{}: the hypothesis is supported. A hardware root, the \dev{}, changes no shared decision and adds
+accountability that even root cannot forge. A
+complete defense combines deterministic and detection-based controls;
+where actions are critical, the deterministic gate, best on every
+measured axis, is indispensable.
+\end{abstract}
